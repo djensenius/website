@@ -1,0 +1,150 @@
+David Jensenius
+david@jensenius.org
+
+Education
+2005-2008 	Masters of Arts, Music Composition. Wesleyan University, Middletown CT.
+1997-2001 	Bachelor of Science, Computer Science. Millersville University, Millersville, PA.
+
+Professional Experience
+
+2008-Present	Composer/Media Artist.
+Build media art pieces and sound compositions using a variety of technologies and custom-built software.
+Created FoundSounds - a worldwide social network and collaborative art project
+Compositions and art have been displayed internationally and throughout Canada. Please consult Performances/Exhibitions section of CV to view exhibition history
+Technology used: ReactJS, NodeJS, Ruby on Rails, Swift, GraphQL, PostgreSQL, MySQL, MongoDB, Redis, AWS, Objective-C, AngularJS, Supercollider, Processing, PHP
+Many projects are open source at https://github.com/djensenius
+
+2016-2018	Developer, Shopify. Waterloo, ON
+Worked on the Shopify Flow team, an automation tool and visual programming language for merchants to customize their stores and automate their supply management chains, from a rough concept to a shipping product.
+First engineer on the Flow project and made decision to use ReactJS for front-end.
+Agile process
+Used Google-style design sprints to create and iterate Flow.
+Created the Sound section of the Shopify design documentation.
+Organized Canada Blood drive, concerts, and a movie screening to contribute to the cultural offerings at Shopify.
+Trained, mentored, and evaluated student interns
+Technology used: ReactJS, Ruby on Rails, MySQL, GraphQL
+
+2016	Developer, Boltmade (Acquired by Shopify). Waterloo, ON
+Worked in small teams to build a parking enforcement web app with Xerox Parc.
+Participated in design sprints and worked with a small team using an agile-like working style.
+Technology used: NodeJS, AngularJS, .NET
+
+2011-2016	Director of Technology, Social Psychology Network. Middletown, CT.
+Manage suite of websites aimed at promoting peace and social justice through social psychology with over 320 million impressions by the end of 2015
+Create and manage educational web-based tools about sexism, racism, and other forms of prejudice and discrimination
+Work with world renown social psychologists such as Philip Zimbardo, Susan Fiske, David Dunning, and many others to preserve their work to the web
+Create tools used in classrooms and for homework assignments used internationally 
+On-call for emergencies
+Extensive knowledge of multiple programming languages and databases
+Manage small team of developers
+Manage team of student interns and testers
+Determine technologies used for future development
+Combined these sites had over 320 million impressions by the time I left
+Technology used: PHP, NodeJS, MySQL, Objective-C, Perl, Shell Script
+
+2015	Curator, New Music at the Boathouse. The Boathouse. Kitchener, ON.
+Curate established and emerging artists for monthly  experimental music series.
+Create and edit podcast and YouTube series.
+Arrange travel and accommodations as needed.
+
+2011	Curator, New Music at the Gallery concert series. Kitchener-Waterloo Art Gallery, Kitchener, ON
+Co-curate established and emerging artists for a series of four experimental music concerts.
+
+2001-2010	Developer, Social Psychology Network. Middletown, CT
+Program and maintain multiple custom built websites
+On-call for emergencies
+Technology used: PHP, NodeJS, MySQL, Objective-C, Perl, Shell Script
+
+2008	Guest Curator, framework radio broadcast and podcast. London, United Kingdom.
+Create 1-hour radio program based on Crooked River in First and Third Persons sound installation.
+
+2008	Guest Curator, Monkeytown. Brooklyn, NY.Board Work
+
+
+Board Work
+2018-Present	Board of Directors, Vice President, NUMUS. Waterloo, ON
+Chair board meetings when board president is not present.
+Review financials.
+Participate in fundraising campaigns and give feedback on marketing and venue selection.
+
+2014-2018	Board of Directors, Secretary, WCSS 556 (Arrow Lofts), Kitchener, ON.
+Make decisions that are best for the condo corporation and the owners.
+Select and work with Property Manager to make sure the building is operating smoothly.
+Review financials and offer suggestions for ways to improve the building.
+
+Performances/Exhibitions
+2016	Telephone Booth. CAFKA. 16.: What We Do Together That We Can’t Do Alone, Kitchener, ON.
+
+2015 	FoundSounds Saskatoon. Sounds Like Audio Art Festival. aka Artist-Run. Saskatoon, SK.
+
+			HATFinder. Mobile augmented reality sound game with Lauren Burr and Mark Prier. Inertia: A Conference on Sound, Media and the Digital Humanities. UCLA,	Los Angeles, CA. (http://HATFinder.org)
+
+			HATengine. A web-based tool for designing and building augmented reality sound 					games, sound walks, or locative sound installations. (http://HATengine.com)
+
+			Pitzer Multi-Species Commons with SPURSE. Pitzer College, Los Angeles, CA.
+
+2014	Sound design in collaboration with Ruth Gibson and Bruno Martelli. In Search of Abandoned v2. QUAD. Derby, United Kingdom
+
+			FoundSounds. Mobile app for finding and sharing sounds. (https://foundsounds.me)
+
+    	The Elora Piano. Solo Exhibition, Elora Centre for the Arts. Elora, ON. (http://elorapiano.com	)
+
+      Sound design in collaboration with Ruth Gibson and Bruno Martelli. In Search of Abandoned. CAFKA.14: It Should Always Be This Way. 					Kitchener, ON.
+
+			Sound design for Sarah Kernohan’s Study For A Dry Current. Commissioned b Toronto Animated Image Society. Toronto, ON.
+
+2013	Performance of György Ligeti’s Poème Symphonique. Between The Ears - Open Ears 					Festival of Music and Sound. Kitchener, ON.
+
+2012	fragility. Open Ears Festival of Music and Sound. Cambridge, ON.
+
+2011	MATR: Pilgrimage Game Variation, in collaboration with SPURSE. BMW Guggenheim Lab, New York, NY.
+
+      MATR 1291: Mobile Apparatus for Temporality Research, in collaborationwith SPURSE. Part of CAFKA.11: SURVIVE. RESIST., Kitchener, ON.
+
+			Suggestion Machine (alpha), performed by University of Maine faculty and students. Orono, ME.
+
+2010 	Fish Futures, in collaboration with SPURSE. Whitney Independent	Study Program exhibition “UNDERCURRENTS : Experimental Ecosystems in 					Recent Art” New York, NY
+			Seeds of Dispersion, in collaboration with SPRUSE. Galera Arsenał, Białysto	Poland.
+
+2009	Selected Works, tour of solo works and improvisation in Chicago, IL, Portland, OR, and New Haven, CT.
+
+      Deep Time + Rapid Time, in collaboration with SPURSE. Grand Arts, Kansas City, MO.
+
+2008 	Four Stochastic (Virtual) Plants for Auditory and Visual Observation, Monkeytown, Brooklyn, NY.
+
+      Crooked River in First and Third Persons, in collaboration with SPURSE. Ingenuity Festival, Cleveland, OH.
+
+      Improvisation as Polish Club, Princeton University, Princeton, NJ.
+
+      7, Monkeytown, Brooklyn, NY.
+
+2007	tc:sw(06-07), Wesleyan University, Middletown, CT.
+
+      Satellites Over Philadelphia, Electro-music Festival, Philadelphia, PA
+
+			(D./C.)e-NTW:v.2.0, Wesleyan University, Middletown, CT.
+
+2006	Capturing the Wumpus, performed by Flux Quartet, Wesleyan University, Middletown, CT.
+
+Lectures/Workshops/Panels
+2015	Augmenting the Soundscape: A Tool for Aural Adventures in Urban Environments. Inertia: A Conference on Sound, Media and the Digital Humanities. UCLA, Los	Angeles, CA.
+
+2014 	What does it sound like here? Fluxible, A User Experience Event. Kitchener, ON.
+
+			Technology as a Tool. University of Waterloo REAP. St. Jacobs, ON.
+
+2011	A Geography of the Event. Society for Literature, Science and Art. Kitchener, ON.
+
+      Notes on Accumulation. Lecture and workshop at University of Maine, Orono, ME.
+
+2010	SPURSE research, in collaboration with SPURSE. 2010 CAFKA Lecture Series. Kitchener, ON.
+
+2009	Deep Time Rapid Time: a way-finding workshop and discussion, in collaboration with SPURSE.  Columbia University, New York, NY, New School,  New York, NY.
+
+Recorded Works
+ppppppppppppppppppppp, Polish Club, Zyt Recordings, 2012.
+7, 440 Music, 2009.
+440 Project, 440 Music, 2006.
+
+References
+Available upon request.
