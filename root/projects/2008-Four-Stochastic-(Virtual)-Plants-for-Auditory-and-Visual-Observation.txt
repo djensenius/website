@@ -1,0 +1,6 @@
+Four Stochastic (Virtual) Plants for Auditory and Visual Observation
+This work explores simple algorithmic genetic creation of plants in a virtual environment. The L-System ruleset exists as follows: 
+
+F-[[X]+X]+F[+FX]-X (start: x angle: 25°)
+
+This is used for all four plants with random rates of growth. The only visual difference, besides minor color variation, between the plants are starting and ending points(xy,not z) of the growths (I must add that I personally find it aesthetically appealing that virtual plants do not have the same physical limitations as actual plants). Each plant is given a unique sonic identity, which varies based on growth rate and location of branches, creating a collage of growth sounds (or the sound of virtual nature).200

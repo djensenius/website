@@ -1,0 +1,4 @@
+Emoticon Music
+Emoticons are popular ways to express a certain feeling in internet emails or internet instant messages. In this piece, a packet sniffer watches for emoticons and then plays an assigned sound for each one as it comes across the network. The listener can hear the overall mood of a certain location. 
+
+Note: This piece should not be performed without receiving the consent of people on the network that their traffic will be monitored.

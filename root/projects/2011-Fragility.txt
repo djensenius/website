@@ -1,0 +1,4 @@
+Fragility
+This is a work that explores feedback. Six guitars are placed on the ground next to amplifiers. The guitars are never touched, the piece is played by adjusting the amplifiers.
+
+Fragility begins by getting each instrument to feed back at low and controlled volumes. The feedback from each instrument interacts with each other. Sine tones are introduced to balance out the frequency range, and to add more complex relations between sounds. Eventually the volume increases to the point that the sound is mostly informed by the physical characteristics of the room. By walking across the room, or even slightly moving ones head, the audience can explore the sound of the room.

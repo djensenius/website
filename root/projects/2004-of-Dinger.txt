@@ -1,0 +1,4 @@
+of Dinger [1100274086-1100275383]
+A piece based on the translation of GPS data for two instruments. This piece uses Glockenspiel and Soprano. Pitch and rhythm of instrument one is based on coordinates and speed. Vocals are based on height, direction traveled, and speed.
+
+Shannon "Dinger" Aldinger provided the GPS data.
