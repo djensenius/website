@@ -1,0 +1,5 @@
+Return of the Wumpus
+A follow up to Capture the Wumpus. As each performer navigates through the space they sense a breeze warning of a pit, or a stench warning of a Wumpus. Sometimes they fall into a pit or are devoured by the Wumpus.
+Hunt the Wumpus by Gregory Yob was the inspiration for this piece. This is a variation of that game using five knowledge based agents.
+A computer program using artificial intelligence was programmed to determine the environments and all movements the player perform. New environments and movements can be created before every performance.
+In this variation the Wumpus is a knowledge based agent who navigates the performance space. While the score is not specific to the chapel, the programming was designed with this performance space in mind. Performers must find the Wumpus and engage in several battles until they realize they must all play together in order to defeat the Wumpus and end the piece.

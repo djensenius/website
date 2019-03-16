@@ -1,0 +1,42 @@
+Capturing the Wumpus
+Performance notes, audio, and video from November 2005 performance.
+
+The Flux Quartet must capture the Wumpus (Anne Rhodes) As each performer navigates through the space they sense a breeze warning of a pit, or a stench warning of a Wumpus. Sometimes they fall into a pit or are devoured by the Wumpus.
+
+Hunt the Wumpus by Gregory Yob was the inspiration for this piece. This is a variation of that game using four knowledge based agents.
+
+A computer program using artificial intelligence was programmed to determine the environments and all movements the player perform. New environments and movements can be created before every performance. 
+
+[Score] - Note: This does not include graphical scores
+Introduction
+
+You, the performers, will play a game in which all the moves have been predetermined by a computer. You will have to move to specific locations in the performance space and interpret the different scores. A director, who follows the director's score, will instruct you on where to move and what to play. 
+
+The object of the game is to capture a monster, called a Wumpus. The monster is located in an imaginary cave known as the performance space. The Wumpus is an optional performer. The performers are aware of the other performers, but do not know the location of the Wumpus. Also, there are pits in the space that act as traps for the performers. If you step into the same space as the Wumpus, you will be eaten. If you step into a pit, you will fall to your doom.
+
+There is little reason to fear becoming Wumpus lunch or falling into a pit. The performance space is set up as a grid with marked off squares in which you will be moving. In spaces immediately surrounding the Wumpus or a pit the environment changes. If you are next to the Wumpus, you will detect an odor. If you are next to a pit, you will feel a breeze. If you become lunch or fall into a pit you return to where you started.
+
+Once all four performers have surrounded the Wumpus, The Final Battle occurs.
+
+The Director
+
+The director's job is to inform all performers where to go and what to perform. Before the piece begins each performer is assigned a number. The director will indicate which performer he or she is instructing by raising the number of fingers corresponding to that performer's number. He or she will then indicate the direction in which the player is to move (forward, backward, left, or right) followed by the number(s) of the environment the player will be playing. The director will then signal the performer(s) to move and to begin playing that environment. The director also has the option to give additional signals to vary the fluctuation and intensity of performances.
+
+Environments
+
+There are five environments. Two of these may coexist. As performers you are expected to improvise based on the included drawings. The duration of these environments is determined by the director.
+
+
+(1) Empty: This environment is empty and the performer is safe.
+(2) Breeze: You can feel a breeze in this environment. This signals that a pit is in an adjoining space. It may be combined with Stench.
+(3) Stench: You smell an incredibly repulsive stench. This signals that the Wumpus is an adjoining space. It may be combined with Breeze.
+(4) Pit: You have fallen to your doom into a pit. On your next move return to the space in which you started. If that space is not available, go to another starting space.
+(5) WUMPUS: You have been eaten and then defecated by the Wumpus. On your next move return to the space in which you started. If that space is not available, go to another starting space. If you are performing the Wumpus, interpret this score as if eating, rather than being eaten. 
+
+
+The Final Battle
+
+The interpretation of this drawing is to be less improvisational. Each of the four lines represents an individual performer. Each player is to play one of these lines. A predetermined length is set by the performers and director before the performance. Time queues may be given by the director to the performers. An indeterminate amount of silence may occur before the Final Battle is to begin. If a Wumpus performer exists, he or she is to improvise based on the other players, but should die before the end of the performance. 
+
+
+Performed by The Flux Quartet with Anne Rhodes

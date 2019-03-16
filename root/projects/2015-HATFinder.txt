@@ -1,3 +1,4 @@
+HAT Finder
 HATFinder is an augmented reality audio-based game, built using HATengine.
 
 You have arrived in the area where Special Agent Z was last seen. We have reason to believe that we can solve his disappearance by investigating Historical Auditory Traces (HATs) found in the area.

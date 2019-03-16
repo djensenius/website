@@ -1,3 +1,4 @@
+HAT Engine
 HATengine is a tool for designing and building augmented reality sound games, sound walks, or locative sound installations.
 
 Players put on headphones and walk to explore the sonic landscape you’ve created. Games can be changed on the fly, with updates being automatically downloaded to users in real time. No need for annoying app updates.

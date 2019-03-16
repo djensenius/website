@@ -1,0 +1,2 @@
+Suggestion Machine (alpha)
+Collage-based artificial intelligence work using live and pre-recorded material. Using predetermined data about different pieces a computer creates a collage and instructs the conductor when to execute different actions. The conductor can disagree with the computer at which time the computer either regenerates the rest of the piece or refuses to and insists the conductor follow the initial instructions.
