@@ -42,8 +42,9 @@ test:
     npm test
 
 # Build the bootable disk image from Markdown (Dockerized — see issue #33).
+# Regenerates public/emulator/root.bin from src/content. Requires Docker.
 image:
-    @echo "TODO(#33): generate the emulator disk image from Markdown via Docker."
+    ./scripts/build-image.sh
 
 # Serve the built site from the self-host container (see issue #38).
 serve:

@@ -7,15 +7,17 @@ import { defineConfig } from 'vite-plus';
 const legacyIgnore = [
   'dist/**',
   '.astro/**',
+  'build/**',
   'node_modules/**',
   'jslinux-mobile/**',
   'root/**',
   'root.bin',
+  'public/emulator/**',
 ];
 
 export default defineConfig({
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'scripts/**/*.test.mjs'],
   },
   lint: {
     ignorePatterns: legacyIgnore,
