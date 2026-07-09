@@ -71,8 +71,12 @@ const codeBodies = await Promise.all(code.map(async (e) => ({ e, r: await render
         color: #b9f27a;
         padding-left: 1rem;
       }
-      button.file:hover,
-      button.file:focus {
+      button.file:hover {
+        text-decoration: underline;
+      }
+      button.file:focus-visible {
+        outline: 2px solid #b9f27a;
+        outline-offset: 2px;
         text-decoration: underline;
       }
       main {
@@ -153,6 +157,7 @@ const codeBodies = await Promise.all(code.map(async (e) => ({ e, r: await render
       document.querySelectorAll('button.file').forEach((btn) => {
         btn.addEventListener('click', () => {
           const target = btn.getAttribute('data-target');
+          if (!target) return;
           empty?.setAttribute('hidden', '');
           articles.forEach((a) => {
             if (a.getAttribute('data-file') === target) {
