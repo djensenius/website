@@ -4,6 +4,12 @@
 // collections as the source of truth. A build-time manifest (issue #21) will later
 // replace this inline traversal, and this prototype will graduate into the real
 // file-navigation island (issue #22).
+//
+// NOTE: this spike deliberately renders every entry's Markdown up front and toggles
+// visibility client-side to keep the interaction instant and dependency-free. That's
+// fine for the handful of sample entries here, but does not scale — the real
+// implementation (#22) should move to per-entry routes (getStaticPaths) or render the
+// selected entry on demand so the generated HTML/DOM stays small.
 import { getCollection, render } from 'astro:content';
 
 const pages = (await getCollection('pages')).sort((a, b) => a.data.order - b.data.order);
@@ -104,7 +110,7 @@ const codeBodies = await Promise.all(code.map(async (e) => ({ e, r: await render
               <li class="dir">{node.label}/</li>
             ) : (
               <li>
-                <button class="file" data-target={node.key}>
+                <button class="file" type="button" aria-pressed="false" data-target={node.key}>
                   {node.label}
                 </button>
               </li>
@@ -119,7 +125,7 @@ const codeBodies = await Promise.all(code.map(async (e) => ({ e, r: await render
       </p>
       {
         pageBodies.map(({ e, r: { Content } }) => (
-          <article data-file={`pages:${e.id}`}>
+          <article data-file={`pages:${e.id}`} tabindex="-1">
             <h1>{e.data.title}</h1>
             <Content />
           </article>
@@ -127,7 +133,7 @@ const codeBodies = await Promise.all(code.map(async (e) => ({ e, r: await render
       }
       {
         projectBodies.map(({ e, r: { Content } }) => (
-          <article data-file={`projects:${e.id}`}>
+          <article data-file={`projects:${e.id}`} tabindex="-1">
             <h1>{e.data.title}</h1>
             {e.data.year && <p class="prompt">{e.data.year}</p>}
             <Content />
@@ -136,7 +142,7 @@ const codeBodies = await Promise.all(code.map(async (e) => ({ e, r: await render
       }
       {
         codeBodies.map(({ e, r: { Content } }) => (
-          <article data-file={`code:${e.id}`}>
+          <article data-file={`code:${e.id}`} tabindex="-1">
             <h1>{e.data.title}</h1>
             <ul>
               {e.data.repos.map((repo) => (
@@ -154,14 +160,17 @@ const codeBodies = await Promise.all(code.map(async (e) => ({ e, r: await render
     <script>
       const empty = document.querySelector('[data-empty]');
       const articles = document.querySelectorAll('article[data-file]');
-      document.querySelectorAll('button.file').forEach((btn) => {
+      const buttons = document.querySelectorAll('button.file');
+      buttons.forEach((btn) => {
         btn.addEventListener('click', () => {
           const target = btn.getAttribute('data-target');
           if (!target) return;
           empty?.setAttribute('hidden', '');
+          buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
           articles.forEach((a) => {
             if (a.getAttribute('data-file') === target) {
               a.setAttribute('data-active', '');
+              (a as HTMLElement).focus();
             } else {
               a.removeAttribute('data-active');
             }
