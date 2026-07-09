@@ -85,7 +85,7 @@ David Jensenius\
 - Created a one-hour radio program based on the _Crooked River in First and Third
   Persons_ sound installation.
 
-### 2008 — Guest Curator, Monkeytown. Brooklyn NY
+**2008** — Guest Curator, Monkeytown. Brooklyn NY.
 
 ## Board Work
 

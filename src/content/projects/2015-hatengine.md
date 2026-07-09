@@ -11,7 +11,7 @@ collaborators:
   - Mark Prier
 links:
   - label: More information
-    url: http://HATengine.com
+    url: https://hatengine.com
 ---
 
 By Lauren Burr, David Jensenius & Mark Prier.
