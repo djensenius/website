@@ -34,16 +34,17 @@ import '../../styles/file-view.css';
   <body class="emulator-page">
     <main>
       <h2 id="status">Booting Linux…</h2>
+      <!-- v86's ScreenAdapter toggles the inline `display` of these two children
+           to switch between text and graphical (VGA) modes, so the initial state
+           is set inline here rather than forced in CSS. -->
       <div id="screen_container">
-        <div class="screen-text"></div>
-        <canvas class="screen-canvas"></canvas>
+        <div class="screen-text" style="display: block"></div>
+        <canvas class="screen-canvas" style="display: none"></canvas>
       </div>
-      <noscript>
-        <p>
-          The emulator needs JavaScript. Browse the same content at
-          <a href={filesHref}>/files</a>.
-        </p>
-      </noscript>
+      <p class="fallback">
+        Prefer plain HTML, or the emulator won't load? Browse the same content at
+        <a href={filesHref}>/files</a>.
+      </p>
     </main>
 
     <script is:inline define:vars={{ config }}>
@@ -57,7 +58,7 @@ import '../../styles/file-view.css';
         try {
           ({ V86 } = await import(config.libPath));
         } catch (err) {
-          setStatus('Failed to load the emulator.');
+          setStatus('Failed to load the emulator — use the /files link below.');
           console.error(err);
           return;
         }

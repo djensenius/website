@@ -163,8 +163,9 @@ body.emulator-page #status {
   overflow: hidden;
 }
 
-/* Text (pre-boot / serial) screen mode. */
-#screen_container .screen-text {
+/* Text (pre-boot / serial) screen mode. v86 toggles inline `display` to switch
+ * between this and the canvas, so only the font styling lives here. */
+body.emulator-page #screen_container .screen-text {
   white-space: pre;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 14px;
@@ -172,7 +173,8 @@ body.emulator-page #status {
   color: #d7d7d7;
 }
 
-/* Graphical VGA screen mode. */
-#screen_container .screen-canvas {
-  display: none;
+body.emulator-page .fallback {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
 }
