@@ -62,6 +62,9 @@ import '../styles/emulator.css';
       autostart: true,
     });
 
+    setupKeyboard(emulator);
+    const refit = setupScaleToFill(emulator);
+
     // Once the shell is ready, drop the visitor into the content at /mnt.
     let greeted = false;
     let buffer = '';
@@ -72,11 +75,10 @@ import '../styles/emulator.css';
         greeted = true;
         setStatus('Linux ready — your files are in /mnt.');
         emulator.serial0_send('cd /mnt && ls\n');
+        // Content just changed the display; re-fit a moment after it renders.
+        setTimeout(() => refit && refit(), 300);
       }
     });
-
-    setupScaleToFill(emulator);
-    setupKeyboard(emulator);
   }
 
   // Scale the emulated display to fill its container's width. v86 renders the
@@ -87,28 +89,53 @@ import '../styles/emulator.css';
     const container = document.getElementById('screen_container');
     if (!container) return;
 
+    // The real, unscaled width of the display. The text rows are block-level, so
+    // their bounding box just reports the parent width; the actual 80-column text
+    // overflows invisibly. Measure it with a Range over the widest row instead.
+    // In graphical (VGA) mode the canvas has an intrinsic pixel width we can use.
+    const naturalWidth = (text, canvas) => {
+      if (text && text.style.display !== 'none') {
+        let max = 0;
+        for (const row of text.children) {
+          const range = document.createRange();
+          range.selectNodeContents(row);
+          const w = range.getBoundingClientRect().width;
+          if (w > max) max = w;
+        }
+        return max;
+      }
+      return canvas ? canvas.width : 0;
+    };
+
     const fit = () => {
-      if (!emulator.screen_adapter) return;
+      if (!emulator.screen_adapter) return false;
       const text = container.querySelector('.screen-text');
       const canvas = container.querySelector('.screen-canvas');
-      const active = text && text.style.display !== 'none' ? text : canvas;
-      if (!active) return;
 
-      // Measure the natural (unscaled) size, then scale to the content width.
+      // Reset to 1:1 so the measurement reflects the unscaled display.
       emulator.screen_set_scale(1, 1);
-      const natural = active.getBoundingClientRect().width;
-      if (!natural) return;
+      const natural = naturalWidth(text, canvas);
+      if (!natural) return false;
       const style = getComputedStyle(container);
       const padX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
       const available = container.clientWidth - padX;
       const scale = Math.max(0.5, Math.min(available / natural, 4));
       emulator.screen_set_scale(scale, scale);
+      return true;
     };
 
+    // Retry until the display has actually rendered (early on, the text grid is
+    // empty and has zero width), then re-fit on every resize / mode change.
+    let tries = 0;
+    const attempt = () => {
+      if (fit() || tries++ > 40) return;
+      setTimeout(() => requestAnimationFrame(attempt), 150);
+    };
     const schedule = () => requestAnimationFrame(fit);
     emulator.add_listener('screen-set-size', schedule);
     window.addEventListener('resize', schedule);
-    schedule();
+    attempt();
+    return fit;
   }
 
   // Respect the host keyboard layout. v86's built-in adapter maps keys purely by
