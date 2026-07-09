@@ -16,7 +16,6 @@ const legacyIgnore = [
 export default defineConfig({
   test: {
     include: ['src/**/*.test.ts'],
-    passWithNoTests: true,
   },
   lint: {
     ignorePatterns: legacyIgnore,
