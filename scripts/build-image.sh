@@ -18,7 +18,13 @@ cd "$repo_root"
 
 base_image="${BASE_IMAGE:-root.bin}"
 out_image="${OUT_IMAGE:-public/emulator/root.bin}"
+out_dir="$(dirname "$out_image")"
+out_name="$(basename "$out_image")"
 staging="build/emulator-root"
+
+# Pin the builder image by digest so the same commit keeps producing the same
+# disk image over time (e2tools 0.1.0-r2 on alpine 3.20).
+builder="alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc"
 
 if [[ ! -f "$base_image" ]]; then
   echo "error: base image '$base_image' not found" >&2
@@ -29,16 +35,17 @@ echo "==> Generating content text from Markdown"
 node scripts/gen-emulator-content.mjs "$staging"
 
 echo "==> Injecting content into a copy of $base_image"
-mkdir -p "$(dirname "$out_image")"
+mkdir -p "$out_dir"
 
 docker run --rm \
+  -e OUT_NAME="$out_name" \
   -v "$repo_root/$base_image:/base.bin:ro" \
   -v "$repo_root/$staging:/content:ro" \
-  -v "$repo_root/$(dirname "$out_image"):/out" \
-  alpine:3.20 sh -euc '
+  -v "$repo_root/$out_dir:/out" \
+  "$builder" sh -euc '
     apk add --no-progress -q e2tools >/dev/null
-    cp /base.bin /out/root.bin
-    img=/out/root.bin
+    img="/out/$OUT_NAME"
+    cp /base.bin "$img"
 
     # Remove the legacy /root content so stale files never linger. Directories
     # (code, projects) already exist in the base image and are reused.
@@ -51,9 +58,9 @@ docker run --rm \
       done
     done
 
-    # Copy the freshly generated tree back in.
+    # Copy the freshly generated tree back in, sorted for reproducible order.
     cd /content
-    find . -type f | sed "s|^\./||" | while read -r rel; do
+    find . -type f | sed "s|^\./||" | sort | while read -r rel; do
       dir=$(dirname "$rel")
       [ "$dir" != "." ] && e2mkdir "$img:/root/$dir" 2>/dev/null || true
       e2cp "$rel" "$img:/root/$rel"

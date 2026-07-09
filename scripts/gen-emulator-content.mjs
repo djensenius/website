@@ -61,6 +61,7 @@ function readCollection(name) {
   const dir = join(contentDir, name);
   return readdirSync(dir)
     .filter((f) => f.endsWith('.md'))
+    .sort() // Deterministic order — readdirSync order is not guaranteed.
     .map((f) => {
       const id = f.replace(/\.md$/, '');
       return { id, ...parse(readFileSync(join(dir, f), 'utf8')) };
