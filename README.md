@@ -62,6 +62,10 @@ The runtime and kernel binaries under `public/emulator/v86/` are committed (they
 regenerated from Markdown). Re-run `just v86-fs` and commit `fs.json` + `fs/` after editing
 content. `just v86-smoke` boots the emulator headless (Node) and asserts the content mounts.
 
+These binaries are third-party (v86, SeaBIOS, VGABIOS, and a buildroot Linux kernel); their
+licenses and source pointers are documented in
+[`public/emulator/v86/THIRD_PARTY_NOTICES.md`](public/emulator/v86/THIRD_PARTY_NOTICES.md).
+
 ## Emulator disk image (legacy format)
 
 `just image` regenerates the emulator's bootable disk image from the Markdown content,
