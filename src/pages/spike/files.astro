@@ -85,6 +85,10 @@ const codeBodies = await Promise.all(code.map(async (e) => ({ e, r: await render
         outline-offset: 2px;
         text-decoration: underline;
       }
+      button.file[aria-current='page'] {
+        color: #fff;
+        font-weight: 700;
+      }
       main {
         padding: 2rem;
         max-width: 70ch;
@@ -110,7 +114,7 @@ const codeBodies = await Promise.all(code.map(async (e) => ({ e, r: await render
               <li class="dir">{node.label}/</li>
             ) : (
               <li>
-                <button class="file" type="button" aria-pressed="false" data-target={node.key}>
+                <button class="file" type="button" data-target={node.key}>
                   {node.label}
                 </button>
               </li>
@@ -166,7 +170,13 @@ const codeBodies = await Promise.all(code.map(async (e) => ({ e, r: await render
           const target = btn.getAttribute('data-target');
           if (!target) return;
           empty?.setAttribute('hidden', '');
-          buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === btn)));
+          buttons.forEach((b) => {
+            if (b === btn) {
+              b.setAttribute('aria-current', 'page');
+            } else {
+              b.removeAttribute('aria-current');
+            }
+          });
           articles.forEach((a) => {
             if (a.getAttribute('data-file') === target) {
               a.setAttribute('data-active', '');
