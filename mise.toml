@@ -1,0 +1,7 @@
+[tools]
+node = "26"
+just = "1.53.0"
+
+[env]
+# Loads variables from a local .env file (gitignored). Copy .env.example to .env.
+_.file = ".env"
