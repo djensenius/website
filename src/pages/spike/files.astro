@@ -13,8 +13,8 @@
 import { getCollection, render } from 'astro:content';
 
 const pages = (await getCollection('pages')).sort((a, b) => a.data.order - b.data.order);
-const projects = await getCollection('projects');
-const code = await getCollection('code');
+const projects = (await getCollection('projects')).sort((a, b) => a.id.localeCompare(b.id));
+const code = (await getCollection('code')).sort((a, b) => a.id.localeCompare(b.id));
 
 // Virtual filesystem tree for the sidebar listing.
 const tree = [
@@ -105,7 +105,7 @@ const codeBodies = await Promise.all(code.map(async (e) => ({ e, r: await render
     </style>
   </head>
   <body>
-    <nav aria-label="File tree">
+    <nav aria-label="Files">
       <h2>~ / david</h2>
       <ul>
         {
