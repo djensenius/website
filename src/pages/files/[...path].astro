@@ -10,28 +10,28 @@ import { buildManifest, fileNodes, type FsNode } from '../../lib/filesystem';
 
 export async function getStaticPaths() {
   const manifest = await buildManifest();
-  return fileNodes(manifest).map((node) => ({
+  const siblings = fileNodes(manifest);
+  return siblings.map((node) => ({
     // node.path is absolute ("/bio", "/projects/x"); strip the leading slash.
     params: { path: node.path.replace(/^\//, '') },
-    props: { node },
+    // Pass the sibling list through props so each route reuses one manifest walk
+    // instead of rebuilding it per page during static generation.
+    props: { node, siblings },
   }));
 }
 
 interface Props {
   node: FsNode;
+  siblings: FsNode[];
 }
 
-const { node } = Astro.props;
+const { node, siblings } = Astro.props;
 
 const entry = await getEntry(node.collection!, node.entryId!);
 if (!entry) {
   throw new Error(`No content entry for ${node.collection}/${node.entryId}`);
 }
 const { Content } = await render(entry);
-
-// Sibling links for a minimal, no-JS directory listing.
-const manifest = await buildManifest();
-const siblings = fileNodes(manifest);
 
 const repos =
   node.collection === 'code' && 'repos' in entry.data

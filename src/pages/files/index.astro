@@ -166,9 +166,12 @@ const bioHref = `${base}files/bio`.replace(/\/{2,}/g, '/');
         if (!node) return;
         empty.hidden = true;
         markCurrent(path);
+        // Clear the previous article and any lingering status/error prompts so
+        // messages don't accumulate across successive opens.
         viewer.querySelector('article')?.remove();
+        viewer.querySelectorAll('p.status').forEach((el) => el.remove());
         const loading = document.createElement('p');
-        loading.className = 'prompt';
+        loading.className = 'prompt status';
         loading.textContent = `cat ${path}…`;
         viewer.append(loading);
         try {
@@ -177,15 +180,14 @@ const bioHref = `${base}files/bio`.replace(/\/{2,}/g, '/');
           const html = await res.text();
           const doc = new DOMParser().parseFromString(html, 'text/html');
           const article = doc.querySelector('article');
+          if (!article) throw new Error('no content found');
           loading.remove();
-          if (article) {
-            viewer.append(article);
-            viewer.focus();
-          }
+          viewer.append(article);
+          viewer.focus();
         } catch (err) {
           loading.remove();
           const p = document.createElement('p');
-          p.className = 'prompt';
+          p.className = 'prompt status';
           p.textContent = `Could not load ${path}: ${(err as Error).message}`;
           viewer.append(p);
         }
