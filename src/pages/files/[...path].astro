@@ -1,0 +1,184 @@
+---
+// Static fallback routes (issue #23).
+// One pre-rendered HTML page per content file, derived from the build-time
+// manifest (issue #21). These give every file a crawlable, no-JS, accessible URL
+// that the file-navigation island (issue #22) can deep-link to and that search
+// engines can index. Paths mirror the virtual filesystem: /files/bio,
+// /files/projects/<id>, /files/code/<id>.
+import { getEntry, render } from 'astro:content';
+import { buildManifest, fileNodes, type FsNode } from '../../lib/filesystem';
+
+export async function getStaticPaths() {
+  const manifest = await buildManifest();
+  const siblings = fileNodes(manifest);
+  return siblings.map((node) => ({
+    // node.path is absolute ("/bio", "/projects/x"); strip the leading slash.
+    params: { path: node.path.replace(/^\//, '') },
+    // Pass the sibling list through props so each route reuses one manifest walk
+    // instead of rebuilding it per page during static generation.
+    props: { node, siblings },
+  }));
+}
+
+interface Props {
+  node: FsNode;
+  siblings: FsNode[];
+}
+
+const { node, siblings } = Astro.props;
+
+const entry = await getEntry(node.collection!, node.entryId!);
+if (!entry) {
+  throw new Error(`No content entry for ${node.collection}/${node.entryId}`);
+}
+const { Content } = await render(entry);
+
+const repos =
+  node.collection === 'code' && 'repos' in entry.data
+    ? (entry.data.repos as { name: string; url: string }[])
+    : [];
+
+const fileHref = (path: string) =>
+  `${import.meta.env.BASE_URL}files/${path.replace(/^\//, '')}`.replace(/\/{2,}/g, '/');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{node.title} — David Jensenius</title>
+    {node.summary && <meta name="description" content={node.summary} />}
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        background: #0b0b0b;
+        color: #d7d7d7;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        display: grid;
+        grid-template-columns: 18rem 1fr;
+        min-height: 100vh;
+      }
+      nav {
+        border-right: 1px solid #222;
+        padding: 1rem;
+        overflow-y: auto;
+      }
+      nav h2 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #6a6a6a;
+      }
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      li {
+        padding: 0.15rem 0;
+      }
+      nav a {
+        color: #b9f27a;
+        text-decoration: none;
+        padding-left: 1rem;
+        display: inline-block;
+      }
+      nav a:hover,
+      nav a:focus-visible {
+        text-decoration: underline;
+      }
+      nav a[aria-current='page'] {
+        color: #fff;
+        font-weight: 700;
+      }
+      main {
+        padding: 2rem;
+        max-width: 70ch;
+      }
+      main a {
+        color: #7aa2f7;
+      }
+      .media {
+        margin-top: 2rem;
+        display: grid;
+        gap: 1.5rem;
+      }
+      .media figure {
+        margin: 0;
+      }
+      .media img {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #222;
+      }
+      .media audio {
+        width: 100%;
+      }
+      .media figcaption {
+        color: #6a6a6a;
+        font-size: 0.85rem;
+        margin-top: 0.35rem;
+      }
+      .prompt {
+        color: #6a6a6a;
+      }
+    </style>
+  </head>
+  <body>
+    <nav aria-label="Files">
+      <h2>~ / david</h2>
+      <ul>
+        {
+          siblings.map((s) => (
+            <li>
+              <a href={fileHref(s.path)} aria-current={s.path === node.path ? 'page' : undefined}>
+                {s.name}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <main>
+      <article>
+        <h1>{node.title}</h1>
+        {node.year && <p class="prompt">{node.year}</p>}
+        {
+          repos.length > 0 && (
+            <ul>
+              {repos.map((repo) => (
+                <li>
+                  <a href={repo.url}>{repo.name}</a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+        <Content />
+        {
+          node.media && node.media.length > 0 && (
+            <section class="media" aria-label="Media">
+              {node.media.map((m) =>
+                m.type === 'image' ? (
+                  <figure>
+                    <img src={m.src} alt={m.alt ?? ''} loading="lazy" />
+                    {m.caption && <figcaption>{m.caption}</figcaption>}
+                  </figure>
+                ) : (
+                  <figure>
+                    <audio controls src={m.src} preload="none" />
+                    {m.caption && <figcaption>{m.caption}</figcaption>}
+                  </figure>
+                ),
+              )}
+            </section>
+          )
+        }
+      </article>
+    </main>
+  </body>
+</html>
