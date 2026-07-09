@@ -156,7 +156,7 @@ body.emulator-page #status {
   color: var(--muted);
 }
 
-#screen_container {
+body.emulator-page #screen_container {
   background: #000;
   border: 1px solid var(--border);
   padding: 0.5rem;
