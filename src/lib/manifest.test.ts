@@ -30,17 +30,20 @@ test('pages are ordered by their order field', () => {
   expect(pagePaths).toEqual(['/bio', '/cv', '/contact']);
 });
 
-test('projects sort by year, undefined year last, then id', () => {
+test('projects sort newest-first: no-year first, then year desc, then id desc', () => {
   const sorted = sortProjects(projects).map((p) => p.id);
-  expect(sorted).toEqual(['2004-of-dinger', '2016-telephone-booth', 'ongoing-foundsounds']);
+  expect(sorted).toEqual(['ongoing-foundsounds', '2016-telephone-booth', '2004-of-dinger']);
 });
 
-test('directories are inserted before their collection files', () => {
+test('directories are listed before their files and before top-level pages', () => {
   const { nodes } = assembleManifest(pages, projects, code, now);
   const projectsDirIdx = nodes.findIndex((n) => n.path === '/projects');
   const firstProjectIdx = nodes.findIndex((n) => n.collection === 'projects');
-  expect(projectsDirIdx).toBeGreaterThanOrEqual(0);
+  const firstPageIdx = nodes.findIndex((n) => n.collection === 'pages');
+  expect(projectsDirIdx).toBe(0);
   expect(projectsDirIdx).toBeLessThan(firstProjectIdx);
+  // Top-level page files come after the directories and their contents.
+  expect(firstPageIdx).toBeGreaterThan(firstProjectIdx);
 });
 
 test('file paths are namespaced by collection', () => {
