@@ -160,7 +160,10 @@ body.emulator-page #screen_container {
   background: #000;
   border: 1px solid var(--border);
   padding: 0.5rem;
-  overflow: hidden;
+  /* Allow scrolling rather than clipping when a wide VGA mode exceeds the
+   * viewport, so the full emulator display stays reachable on small screens. */
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Text (pre-boot / serial) screen mode. v86 toggles inline `display` to switch

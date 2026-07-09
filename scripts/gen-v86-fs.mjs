@@ -81,7 +81,7 @@ function main() {
   const outDir = process.argv[2] ?? join(repoRoot, 'public', 'emulator', 'v86');
   const fsDir = join(outDir, 'fs');
 
-  const { fsjson, store } = buildFs(buildContentTree());
+  const { fsjson, store } = buildFs(buildContentTree({ includeLegacyLicense: false }));
 
   // Fresh body store; leave sibling assets (wasm, bios, bzimage) untouched.
   if (existsSync(fsDir)) rmSync(fsDir, { recursive: true, force: true });

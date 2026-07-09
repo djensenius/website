@@ -105,8 +105,13 @@ export function renderProject(project) {
  * `{ path, contents }` entries mirroring the on-disk layout. Both the plain-text
  * generator (`main`) and the v86 9p filesystem generator (`gen-v86-fs.mjs`)
  * consume this, keeping a single rendering path from Markdown.
+ *
+ * `includeLegacyLicense` appends `root/LICENSE` — the JSLinux-derivative notice
+ * (with a redistribution prohibition). It belongs in the legacy jslinux disk
+ * image only; the modern v86 build documents its licensing separately in
+ * public/emulator/v86/THIRD_PARTY_NOTICES.md, so it opts out.
  */
-export function buildContentTree() {
+export function buildContentTree({ includeLegacyLicense = true } = {}) {
   const files = [];
   const push = (path, contents) => {
     files.push({ path, contents: contents.endsWith('\n') ? contents : `${contents}\n` });
@@ -117,7 +122,7 @@ export function buildContentTree() {
     push(`projects/${project.id}.txt`, renderProject(project));
   }
   const license = join(repoRoot, 'root', 'LICENSE');
-  if (existsSync(license)) push('LICENSE', readFileSync(license, 'utf8'));
+  if (includeLegacyLicense && existsSync(license)) push('LICENSE', readFileSync(license, 'utf8'));
   return files;
 }
 
