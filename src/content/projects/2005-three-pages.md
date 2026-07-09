@@ -16,4 +16,4 @@ This work and _The Presage_ are a collaboration with Walter Frank. We each used 
 same graphical notation logics (created by Walter Frank) to make graphical scores. I
 interpreted them on the computer and Walter interpreted them on the piano.
 
-David Jensenius realization of Walter Frank score.
+_A David Jensenius realization of Walter Frank's score._

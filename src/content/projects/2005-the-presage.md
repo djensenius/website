@@ -16,4 +16,4 @@ This work and _Three Pages_ are a collaboration with Walter Frank. We each used 
 same graphical notation logics (created by Walter Frank) to make graphical scores. I
 interpreted them on the computer and Walter interpreted them on the piano.
 
-Walter Frank realization of David Jensenius score.
+_A Walter Frank realization of David Jensenius's score._
