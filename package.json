@@ -13,7 +13,8 @@
     "check": "vp check",
     "lint": "vp lint",
     "fmt": "vp fmt",
-    "test": "vp test"
+    "test": "vp test --run",
+    "test:watch": "vp test"
   },
   "dependencies": {
     "astro": "^5.0.0"

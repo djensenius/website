@@ -5,6 +5,7 @@ import { defineConfig } from 'vite-plus';
 export default defineConfig({
   test: {
     include: ['src/**/*.test.ts'],
+    passWithNoTests: true,
   },
   lint: {
     ignorePatterns: ['dist/**', '.astro/**', 'node_modules/**'],
