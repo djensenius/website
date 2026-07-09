@@ -7,25 +7,25 @@
 // /files/projects/<id>, /files/code/<id>.
 import { getEntry, render } from 'astro:content';
 import { buildManifest, fileNodes, type FsNode } from '../../lib/filesystem';
+import '../../styles/file-view.css';
 
 export async function getStaticPaths() {
   const manifest = await buildManifest();
-  const siblings = fileNodes(manifest);
-  return siblings.map((node) => ({
+  return fileNodes(manifest).map((node) => ({
     // node.path is absolute ("/bio", "/projects/x"); strip the leading slash.
     params: { path: node.path.replace(/^\//, '') },
-    // Pass the sibling list through props so each route reuses one manifest walk
-    // instead of rebuilding it per page during static generation.
-    props: { node, siblings },
+    // Pass the full node list through props so each route reuses one manifest
+    // walk instead of rebuilding it per page during static generation.
+    props: { node, tree: manifest.nodes },
   }));
 }
 
 interface Props {
   node: FsNode;
-  siblings: FsNode[];
+  tree: FsNode[];
 }
 
-const { node, siblings } = Astro.props;
+const { node, tree } = Astro.props;
 
 const entry = await getEntry(node.collection!, node.entryId!);
 if (!entry) {
@@ -49,97 +49,27 @@ const fileHref = (path: string) =>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{node.title} — David Jensenius</title>
     {node.summary && <meta name="description" content={node.summary} />}
-    <style>
-      :root {
-        color-scheme: dark;
-      }
-      body {
-        margin: 0;
-        background: #0b0b0b;
-        color: #d7d7d7;
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        display: grid;
-        grid-template-columns: 18rem 1fr;
-        min-height: 100vh;
-      }
-      nav {
-        border-right: 1px solid #222;
-        padding: 1rem;
-        overflow-y: auto;
-      }
-      nav h2 {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        color: #6a6a6a;
-      }
-      ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-      }
-      li {
-        padding: 0.15rem 0;
-      }
-      nav a {
-        color: #b9f27a;
-        text-decoration: none;
-        padding-left: 1rem;
-        display: inline-block;
-      }
-      nav a:hover,
-      nav a:focus-visible {
-        text-decoration: underline;
-      }
-      nav a[aria-current='page'] {
-        color: #fff;
-        font-weight: 700;
-      }
-      main {
-        padding: 2rem;
-        max-width: 70ch;
-      }
-      main a {
-        color: #7aa2f7;
-      }
-      .media {
-        margin-top: 2rem;
-        display: grid;
-        gap: 1.5rem;
-      }
-      .media figure {
-        margin: 0;
-      }
-      .media img {
-        max-width: 100%;
-        height: auto;
-        border: 1px solid #222;
-      }
-      .media audio {
-        width: 100%;
-      }
-      .media figcaption {
-        color: #6a6a6a;
-        font-size: 0.85rem;
-        margin-top: 0.35rem;
-      }
-      .prompt {
-        color: #6a6a6a;
-      }
-    </style>
   </head>
   <body>
     <nav aria-label="Files">
       <h2>~ / david</h2>
       <ul>
         {
-          siblings.map((s) => (
-            <li>
-              <a href={fileHref(s.path)} aria-current={s.path === node.path ? 'page' : undefined}>
-                {s.name}
-              </a>
-            </li>
-          ))
+          tree.map((n) =>
+            n.kind === 'dir' ? (
+              <li class="dir">{n.name}/</li>
+            ) : (
+              <li class="file">
+                <a
+                  class="entry"
+                  href={fileHref(n.path)}
+                  aria-current={n.path === node.path ? 'page' : undefined}
+                >
+                  {n.name}
+                </a>
+              </li>
+            ),
+          )
         }
       </ul>
     </nav>

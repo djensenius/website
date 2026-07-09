@@ -46,12 +46,15 @@ export function sortPages<T extends PageInput>(pages: T[]): T[] {
   return [...pages].sort((a, b) => a.data.order - b.data.order);
 }
 
+// Projects are listed newest-first: entries with no year (ongoing work) sort to
+// the very top, then descending by year, then descending by id as a stable
+// tiebreak so the whole list reads most-recent → oldest.
 export function sortProjects<T extends ProjectInput>(projects: T[]): T[] {
   return [...projects].sort((a, b) => {
     const ay = a.data.year ?? Number.POSITIVE_INFINITY;
     const by = b.data.year ?? Number.POSITIVE_INFINITY;
-    if (ay !== by) return ay - by;
-    return a.id.localeCompare(b.id);
+    if (ay !== by) return by - ay;
+    return b.id.localeCompare(a.id);
   });
 }
 
@@ -98,8 +101,9 @@ function codeNode(entry: CodeInput): FsNode {
 
 /**
  * Assemble the virtual filesystem manifest from already-fetched collection entries.
- * Pages are top-level "files"; projects and code live under their own directories.
- * Entries are sorted deterministically so navigation and generated HTML are stable.
+ * Directories are listed first (each followed by its files, newest-first); the
+ * top-level page "files" (bio/cv/contact) come last, in their defined order.
+ * Ordering is deterministic so navigation and generated HTML are stable.
  * Pure and runtime-agnostic so it can be unit-tested without astro:content.
  */
 export function assembleManifest(
@@ -109,11 +113,11 @@ export function assembleManifest(
   now: Date = new Date(),
 ): FilesystemManifest {
   const nodes: FsNode[] = [
-    ...sortPages(pages).map(pageNode),
     { path: '/projects', name: 'projects', kind: 'dir' },
     ...sortProjects(projects).map(projectNode),
     { path: '/code', name: 'code', kind: 'dir' },
     ...sortCode(code).map(codeNode),
+    ...sortPages(pages).map(pageNode),
   ];
   return { generatedAt: now.toISOString(), nodes };
 }
