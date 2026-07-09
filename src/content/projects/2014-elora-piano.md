@@ -1,0 +1,24 @@
+---
+title: The Elora Piano
+year: 2014
+summary: A sound installation transforming a building's movements into a score played by a grand piano.
+tags:
+  - installation
+  - piano
+  - residency
+links:
+  - label: More information
+    url: https://elorapiano.com
+---
+
+As a building moves, creaks, and groans, its sounds are transformed into a score
+continuously played by a grand piano. _The Elora Piano_, a sound installation by David
+Jensenius, lets all those who wander into the Elora Centre for the Arts experience the
+building's own composition.
+
+During his residency at ECFTA, Jensenius explored the building (formerly the Elora
+Public School) and the various groups, organizations, artists, children, and adults
+that occupy the physical, intellectual, and energetic space of Elora Centre for the
+Arts. His residency set the stage for Jensenius' exhibition, wherein the artist wired
+the building for activity and sound which in turn was transformed and played through
+instruments stationed in the gallery as an ongoing, reactionary, musical composition.

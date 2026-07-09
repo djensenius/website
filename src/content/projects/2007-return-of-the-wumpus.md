@@ -1,0 +1,27 @@
+---
+title: Return of the Wumpus
+year: 2007
+summary: A follow-up to Capturing the Wumpus with the Wumpus as a knowledge-based agent navigating the space.
+tags:
+  - composition
+  - game
+  - artificial-intelligence
+  - performance
+---
+
+A follow-up to _Capturing the Wumpus_. As each performer navigates through the space
+they sense a breeze warning of a pit, or a stench warning of a Wumpus. Sometimes they
+fall into a pit or are devoured by the Wumpus.
+
+_Hunt the Wumpus_ by Gregory Yob was the inspiration for this piece. This is a
+variation of that game using five knowledge-based agents.
+
+A computer program using artificial intelligence was programmed to determine the
+environments and all movements the players perform. New environments and movements
+can be created before every performance.
+
+In this variation the Wumpus is a knowledge-based agent who navigates the performance
+space. While the score is not specific to the chapel, the programming was designed
+with this performance space in mind. Performers must find the Wumpus and engage in
+several battles until they realize they must all play together in order to defeat the
+Wumpus and end the piece.
