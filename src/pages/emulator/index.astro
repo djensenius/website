@@ -1,0 +1,96 @@
+---
+// Modern WASM emulator (issue #37). Boots a tiny buildroot Linux (v86 / copy.sh)
+// entirely in the browser via WebAssembly and mounts the site content — generated
+// from Markdown into a v86 9p filesystem (scripts/gen-v86-fs.mjs) — at /mnt. This
+// replaces the legacy jslinux-mobile submodule. Embedding into the main shell and
+// the emulator↔file-nav toggle are handled separately (#34/#35); this page is the
+// self-contained, working emulator those build on.
+const base = import.meta.env.BASE_URL;
+const asset = (p: string) => `${base}emulator/v86/${p}`.replace(/\/{2,}/g, '/');
+const filesHref = `${base}files/`.replace(/\/{2,}/g, '/');
+const config = {
+  wasmPath: asset('v86.wasm'),
+  libPath: asset('libv86.mjs'),
+  bios: asset('bios/seabios.bin'),
+  vgaBios: asset('bios/vgabios.bin'),
+  bzimage: asset('buildroot-bzimage.bin'),
+  basefs: asset('fs.json'),
+  baseurl: asset('fs/'),
+};
+import '../../styles/file-view.css';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Emulator — David Jensenius</title>
+    <meta
+      name="description"
+      content="A tiny Linux, running in your browser, holding the work of David Jensenius."
+    />
+  </head>
+  <body class="emulator-page">
+    <main>
+      <h2 id="status" role="status" aria-live="polite">Booting Linux…</h2>
+      <!-- v86's ScreenAdapter toggles the inline `display` of these two children
+           to switch between text and graphical (VGA) modes, so the initial state
+           is set inline here rather than forced in CSS. -->
+      <div id="screen_container">
+        <div class="screen-text" style="display: block"></div>
+        <canvas class="screen-canvas" style="display: none"></canvas>
+      </div>
+      <p class="fallback">
+        Prefer plain HTML, or the emulator won't load? Browse the same content at
+        <a href={filesHref}>/files</a>.
+      </p>
+    </main>
+
+    <script is:inline define:vars={{ config }}>
+      const statusEl = document.getElementById('status');
+      const setStatus = (text) => {
+        if (statusEl) statusEl.textContent = text;
+      };
+
+      async function boot() {
+        let V86;
+        try {
+          ({ V86 } = await import(config.libPath));
+        } catch (err) {
+          setStatus('Failed to load the emulator — use the /files link below.');
+          console.error(err);
+          return;
+        }
+
+        const emulator = new V86({
+          wasm_path: config.wasmPath,
+          memory_size: 128 * 1024 * 1024,
+          vga_memory_size: 4 * 1024 * 1024,
+          screen_container: document.getElementById('screen_container'),
+          bios: { url: config.bios },
+          vga_bios: { url: config.vgaBios },
+          bzimage: { url: config.bzimage, async: false },
+          filesystem: { basefs: config.basefs, baseurl: config.baseurl },
+          cmdline: 'tsc=reliable mitigations=off random.trust_cpu=on',
+          autostart: true,
+        });
+
+        // Once the shell is ready, drop the visitor into the content at /mnt.
+        let greeted = false;
+        let buffer = '';
+        emulator.add_listener('serial0-output-byte', (byte) => {
+          if (greeted) return;
+          buffer = (buffer + String.fromCharCode(byte)).slice(-64);
+          if (/[#%]\s$/.test(buffer)) {
+            greeted = true;
+            setStatus('Linux ready — your files are in /mnt.');
+            emulator.serial0_send('cd /mnt && ls\n');
+          }
+        });
+      }
+
+      boot();
+    </script>
+  </body>
+</html>

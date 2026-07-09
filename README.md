@@ -37,11 +37,36 @@ just dev        # start the dev server
 just build      # build the production static site
 just preview    # preview the production build
 just check      # format + lint + type-check (Vite+ and astro check)
-just image      # build the emulator disk image from Markdown (Dockerized, #33)
+just image      # build the legacy emulator disk image from Markdown (Dockerized, #33)
+just v86-fs     # regenerate the v86 WASM emulator filesystem from Markdown (#37)
+just v86-smoke  # boot the v86 emulator headless and verify content mounts (#37)
 just serve      # run the self-host container — WIP (#38)
 ```
 
-## Emulator disk image
+## WASM emulator (v86)
+
+The modern in-browser emulator ([v86](https://github.com/copy/v86)) boots a tiny buildroot
+Linux entirely in WebAssembly and mounts the site content at `/mnt`. It lives at the
+`/emulator` route and replaces the legacy jslinux build.
+
+Content is generated from Markdown into v86's JSON/HTTP 9p filesystem format:
+
+1. `scripts/gen-v86-fs.mjs` reuses `buildContentTree()` (the same Markdown rendering path as
+   the disk image) and emits `public/emulator/v86/fs.json` plus a content-addressed
+   `public/emulator/v86/fs/<hash>.bin` body store.
+2. The page (`src/pages/emulator/index.astro`) loads the committed v86 runtime
+   (`v86.wasm`, `libv86.mjs`), SeaBIOS, and the `buildroot-bzimage.bin` kernel, then mounts
+   the 9p filesystem so the visitor lands in their files at `/mnt`.
+
+The runtime and kernel binaries under `public/emulator/v86/` are committed (they can't be
+regenerated from Markdown). Re-run `just v86-fs` and commit `fs.json` + `fs/` after editing
+content. `just v86-smoke` boots the emulator headless (Node) and asserts the content mounts.
+
+These binaries are third-party (v86, SeaBIOS, VGABIOS, and a buildroot Linux kernel); their
+licenses and source pointers are documented in
+[`public/emulator/v86/THIRD_PARTY_NOTICES.md`](public/emulator/v86/THIRD_PARTY_NOTICES.md).
+
+## Emulator disk image (legacy format)
 
 `just image` regenerates the emulator's bootable disk image from the Markdown content,
 replacing the old manual `sudo mount -o loop` editing. The build:
@@ -59,5 +84,6 @@ emulator. Re-run `just image` and commit `public/emulator/root.bin` after editin
 
 The original site ran a jslinux emulator booting `root.bin` (an ext2 image edited via
 `sudo mount -o loop`). During migration, the legacy `root/` content and `root.bin` remain
-in the repo and are being ported to Markdown under `src/content/`. The emulator is being
-modernized to a WASM-based build (see #37).
+in the repo and are being ported to Markdown under `src/content/`. The emulator has been
+modernized to a WASM-based build (v86, see above and #37); the `jslinux-mobile` submodule is
+kept as reference until the final cleanup.
