@@ -7,9 +7,9 @@ set shell := ["bash", "-cu"]
 default:
     @just --list
 
-# Install dependencies.
+# Install dependencies (reproducible, matches CI).
 install:
-    npm install
+    npm ci
 
 # Run the full site locally (Astro dev server + islands) with live reload.
 dev:
