@@ -1,0 +1,192 @@
+---
+// File-navigation spike (issue #15).
+// Proves the "directory listing renders Markdown" concept using Astro content
+// collections as the source of truth. A build-time manifest (issue #21) will later
+// replace this inline traversal, and this prototype will graduate into the real
+// file-navigation island (issue #22).
+//
+// NOTE: this spike deliberately renders every entry's Markdown up front and toggles
+// visibility client-side to keep the interaction instant and dependency-free. That's
+// fine for the handful of sample entries here, but does not scale — the real
+// implementation (#22) should move to per-entry routes (getStaticPaths) or render the
+// selected entry on demand so the generated HTML/DOM stays small.
+import { getCollection, render } from 'astro:content';
+
+const pages = (await getCollection('pages')).sort((a, b) => a.data.order - b.data.order);
+const projects = (await getCollection('projects')).sort((a, b) => a.id.localeCompare(b.id));
+const code = (await getCollection('code')).sort((a, b) => a.id.localeCompare(b.id));
+
+// Virtual filesystem tree for the sidebar listing.
+const tree = [
+  ...pages.map((e) => ({ kind: 'file' as const, label: e.data.title, key: `pages:${e.id}` })),
+  { kind: 'dir' as const, label: 'projects' },
+  ...projects.map((e) => ({ kind: 'file' as const, label: e.id, key: `projects:${e.id}` })),
+  { kind: 'dir' as const, label: 'code' },
+  ...code.map((e) => ({ kind: 'file' as const, label: e.id, key: `code:${e.id}` })),
+];
+
+const pageBodies = await Promise.all(pages.map(async (e) => ({ e, r: await render(e) })));
+const projectBodies = await Promise.all(projects.map(async (e) => ({ e, r: await render(e) })));
+const codeBodies = await Promise.all(code.map(async (e) => ({ e, r: await render(e) })));
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>File navigation — spike</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        background: #0b0b0b;
+        color: #d7d7d7;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        display: grid;
+        grid-template-columns: 18rem 1fr;
+        min-height: 100vh;
+      }
+      nav {
+        border-right: 1px solid #222;
+        padding: 1rem;
+        overflow-y: auto;
+      }
+      nav h2 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #6a6a6a;
+      }
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      li {
+        padding: 0.15rem 0;
+      }
+      .dir {
+        color: #7aa2f7;
+      }
+      button.file {
+        all: unset;
+        cursor: pointer;
+        color: #b9f27a;
+        padding-left: 1rem;
+      }
+      button.file:hover {
+        text-decoration: underline;
+      }
+      button.file:focus-visible {
+        outline: 2px solid #b9f27a;
+        outline-offset: 2px;
+        text-decoration: underline;
+      }
+      button.file[aria-current='page'] {
+        color: #fff;
+        font-weight: 700;
+      }
+      main {
+        padding: 2rem;
+        max-width: 70ch;
+      }
+      article:not([data-active]) {
+        display: none;
+      }
+      .prompt {
+        color: #6a6a6a;
+      }
+      a {
+        color: #7aa2f7;
+      }
+    </style>
+  </head>
+  <body>
+    <nav aria-label="Files">
+      <h2>~ / david</h2>
+      <ul>
+        {
+          tree.map((node) =>
+            node.kind === 'dir' ? (
+              <li class="dir">{node.label}/</li>
+            ) : (
+              <li>
+                <button class="file" type="button" data-target={node.key}>
+                  {node.label}
+                </button>
+              </li>
+            ),
+          )
+        }
+      </ul>
+    </nav>
+    <main>
+      <p class="prompt" data-empty>
+        Select a file to <code>cat</code> it.
+      </p>
+      {
+        pageBodies.map(({ e, r: { Content } }) => (
+          <article data-file={`pages:${e.id}`} tabindex="-1">
+            <h1>{e.data.title}</h1>
+            <Content />
+          </article>
+        ))
+      }
+      {
+        projectBodies.map(({ e, r: { Content } }) => (
+          <article data-file={`projects:${e.id}`} tabindex="-1">
+            <h1>{e.data.title}</h1>
+            {e.data.year && <p class="prompt">{e.data.year}</p>}
+            <Content />
+          </article>
+        ))
+      }
+      {
+        codeBodies.map(({ e, r: { Content } }) => (
+          <article data-file={`code:${e.id}`} tabindex="-1">
+            <h1>{e.data.title}</h1>
+            <ul>
+              {e.data.repos.map((repo) => (
+                <li>
+                  <a href={repo.url}>{repo.name}</a>
+                </li>
+              ))}
+            </ul>
+            <Content />
+          </article>
+        ))
+      }
+    </main>
+
+    <script>
+      const empty = document.querySelector('[data-empty]');
+      const articles = document.querySelectorAll('article[data-file]');
+      const buttons = document.querySelectorAll('button.file');
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-target');
+          if (!target) return;
+          empty?.setAttribute('hidden', '');
+          buttons.forEach((b) => {
+            if (b === btn) {
+              b.setAttribute('aria-current', 'page');
+            } else {
+              b.removeAttribute('aria-current');
+            }
+          });
+          articles.forEach((a) => {
+            if (a.getAttribute('data-file') === target) {
+              a.setAttribute('data-active', '');
+              if (a instanceof HTMLElement) a.focus();
+            } else {
+              a.removeAttribute('data-active');
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
