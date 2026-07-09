@@ -25,15 +25,13 @@ jobs:
         uses: jdx/mise-action@v2
 
       - name: Install dependencies
-        run: npm ci
+        run: just install
 
       - name: Format, lint & type-check
-        run: |
-          npm run check
-          npm run astro:check
+        run: just check
 
       - name: Test
-        run: npm test
+        run: just test
 
       - name: Build
-        run: npm run build
+        run: just build
