@@ -1,5 +1,6 @@
 # justfile — task hub for the website.
-# Run `just` to list recipes. Requires: mise, node (via mise), Docker (for image tasks).
+# Run `just` to list recipes. Requires: mise, node (via mise).
+# Docker is only needed for the image/serve recipes (WIP).
 
 set shell := ["bash", "-cu"]
 

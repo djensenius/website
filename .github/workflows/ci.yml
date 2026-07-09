@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   check:
-    name: Lint, type-check & test
+    name: Format, lint, type-check, test & build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

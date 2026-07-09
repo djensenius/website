@@ -36,7 +36,7 @@ just            # list all recipes
 just dev        # start the dev server
 just build      # build the production static site
 just preview    # preview the production build
-just check      # format + lint + type-check
+just check      # format + lint + type-check (Vite+ and astro check)
 just image      # build the emulator disk image (Dockerized) — WIP (#33)
 just serve      # run the self-host container — WIP (#38)
 ```
