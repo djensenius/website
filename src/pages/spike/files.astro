@@ -170,7 +170,7 @@ const codeBodies = await Promise.all(code.map(async (e) => ({ e, r: await render
           articles.forEach((a) => {
             if (a.getAttribute('data-file') === target) {
               a.setAttribute('data-active', '');
-              (a as HTMLElement).focus();
+              if (a instanceof HTMLElement) a.focus();
             } else {
               a.removeAttribute('data-active');
             }

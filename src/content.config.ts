@@ -7,13 +7,22 @@ const link = z.object({
   url: z.string().url(),
 });
 
-// A media asset (image or audio) associated with a project.
-const media = z.object({
-  type: z.enum(['image', 'audio']),
-  src: z.string(),
-  alt: z.string().optional(),
-  caption: z.string().optional(),
-});
+// A media asset (image or audio) associated with a project. Images require alt
+// text for accessibility; audio may omit it.
+const media = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('image'),
+    src: z.string(),
+    alt: z.string(),
+    caption: z.string().optional(),
+  }),
+  z.object({
+    type: z.literal('audio'),
+    src: z.string(),
+    alt: z.string().optional(),
+    caption: z.string().optional(),
+  }),
+]);
 
 // Top-level "files" in the site's virtual filesystem: bio, cv, contact.
 const pages = defineCollection({
