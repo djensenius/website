@@ -134,3 +134,45 @@ main a {
 [hidden] {
   display: none !important;
 }
+
+/*
+ * WASM emulator page (issue #37). The v86 screen is a single centered column,
+ * so override the two-column file-nav grid for this page only.
+ */
+body.emulator-page {
+  display: block;
+  padding: 1rem;
+}
+
+body.emulator-page main {
+  max-width: 60rem;
+  margin: 0 auto;
+}
+
+body.emulator-page #status {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
+#screen_container {
+  background: #000;
+  border: 1px solid var(--border);
+  padding: 0.5rem;
+  overflow: hidden;
+}
+
+/* Text (pre-boot / serial) screen mode. */
+#screen_container .screen-text {
+  white-space: pre;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14px;
+  line-height: 14px;
+  color: #d7d7d7;
+}
+
+/* Graphical VGA screen mode. */
+#screen_container .screen-canvas {
+  display: none;
+}

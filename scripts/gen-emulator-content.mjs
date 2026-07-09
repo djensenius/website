@@ -100,6 +100,27 @@ export function renderProject(project) {
   return `${underline(header)}\n${summary}\n${project.body}\n`;
 }
 
+/**
+ * Build the emulator's virtual filesystem in memory: an array of
+ * `{ path, contents }` entries mirroring the on-disk layout. Both the plain-text
+ * generator (`main`) and the v86 9p filesystem generator (`gen-v86-fs.mjs`)
+ * consume this, keeping a single rendering path from Markdown.
+ */
+export function buildContentTree() {
+  const files = [];
+  const push = (path, contents) => {
+    files.push({ path, contents: contents.endsWith('\n') ? contents : `${contents}\n` });
+  };
+  for (const page of readCollection('pages')) push(`${page.id}.txt`, renderPage(page));
+  for (const entry of readCollection('code')) push(`code/${entry.id}.txt`, renderCode(entry));
+  for (const project of readCollection('projects')) {
+    push(`projects/${project.id}.txt`, renderProject(project));
+  }
+  const license = join(repoRoot, 'root', 'LICENSE');
+  if (existsSync(license)) push('LICENSE', readFileSync(license, 'utf8'));
+  return files;
+}
+
 function main() {
   const outDir = process.argv[2] ?? join(repoRoot, 'build', 'emulator-root');
 
@@ -107,23 +128,10 @@ function main() {
   if (existsSync(outDir)) rmSync(outDir, { recursive: true, force: true });
   mkdirSync(outDir, { recursive: true });
 
-  for (const page of readCollection('pages')) {
-    writeFile(outDir, `${page.id}.txt`, renderPage(page));
-  }
-  for (const entry of readCollection('code')) {
-    writeFile(outDir, `code/${entry.id}.txt`, renderCode(entry));
-  }
-  for (const project of readCollection('projects')) {
-    writeFile(outDir, `projects/${project.id}.txt`, renderProject(project));
-  }
+  const files = buildContentTree();
+  for (const { path, contents } of files) writeFile(outDir, path, contents);
 
-  // Keep the JSLinux attribution license alongside the content.
-  const license = join(repoRoot, 'root', 'LICENSE');
-  if (existsSync(license)) writeFile(outDir, 'LICENSE', readFileSync(license, 'utf8'));
-
-  const count = readdirSync(outDir, { recursive: true }).filter((p) =>
-    String(p).endsWith('.txt'),
-  ).length;
+  const count = files.filter((f) => f.path.endsWith('.txt')).length;
   console.log(`Generated ${count} text files into ${outDir}`);
 }
 

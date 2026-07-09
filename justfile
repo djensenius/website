@@ -46,6 +46,15 @@ test:
 image:
     ./scripts/build-image.sh
 
+# Regenerate the v86 WASM emulator's 9p filesystem from Markdown (issue #37).
+# Writes public/emulator/v86/fs.json and public/emulator/v86/fs/. No Docker needed.
+v86-fs:
+    node scripts/gen-v86-fs.mjs
+
+# Boot the v86 emulator headless and verify the content mounts at /mnt (issue #37).
+v86-smoke:
+    node scripts/v86-smoke.mjs
+
 # Serve the built site from the self-host container (see issue #38).
 serve:
     @echo "TODO(#38): run the self-host container (Astro build -> nginx/caddy)."
