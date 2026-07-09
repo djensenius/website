@@ -1,0 +1,156 @@
+---
+// Embeddable v86 WASM emulator (issues #37/#34). Boots a tiny buildroot Linux in
+// the browser and mounts the Markdown-derived 9p filesystem at /mnt, dropping the
+// visitor straight into the site content. Used by the landing shell
+// (src/pages/index.astro) and the standalone /emulator route.
+const base = import.meta.env.BASE_URL;
+const asset = (p: string) => `${base}emulator/v86/${p}`.replace(/\/{2,}/g, '/');
+const filesHref = `${base}files/`.replace(/\/{2,}/g, '/');
+const config = {
+  wasmPath: asset('v86.wasm'),
+  libPath: asset('libv86.mjs'),
+  bios: asset('bios/seabios.bin'),
+  vgaBios: asset('bios/vgabios.bin'),
+  bzimage: asset('buildroot-bzimage.bin'),
+  basefs: asset('fs.json'),
+  baseurl: asset('fs/'),
+};
+import '../styles/emulator.css';
+---
+
+<div class="emulator">
+  <p id="status" class="status" role="status" aria-live="polite">Booting Linux…</p>
+  <!-- v86's ScreenAdapter toggles the inline `display` of these two children to
+       switch between text and graphical (VGA) modes, so the initial state is set
+       inline here rather than in CSS. -->
+  <div id="screen_container" class="screen">
+    <div class="screen-text" style="display: block"></div>
+    <canvas class="screen-canvas" style="display: none"></canvas>
+  </div>
+  <p class="fallback">
+    Prefer plain HTML, or the emulator won't load? Browse the same content at
+    <a href={filesHref}>/files</a>.
+  </p>
+</div>
+
+<script is:inline define:vars={{ config }}>
+  const statusEl = document.getElementById('status');
+  const setStatus = (text) => {
+    if (statusEl) statusEl.textContent = text;
+  };
+
+  async function boot() {
+    let V86;
+    try {
+      ({ V86 } = await import(config.libPath));
+    } catch (err) {
+      setStatus('Failed to load the emulator — use the /files link below.');
+      console.error(err);
+      return;
+    }
+
+    const emulator = new V86({
+      wasm_path: config.wasmPath,
+      memory_size: 128 * 1024 * 1024,
+      vga_memory_size: 4 * 1024 * 1024,
+      screen_container: document.getElementById('screen_container'),
+      bios: { url: config.bios },
+      vga_bios: { url: config.vgaBios },
+      bzimage: { url: config.bzimage, async: false },
+      filesystem: { basefs: config.basefs, baseurl: config.baseurl },
+      cmdline: 'tsc=reliable mitigations=off random.trust_cpu=on',
+      autostart: true,
+    });
+
+    // Once the shell is ready, drop the visitor into the content at /mnt.
+    let greeted = false;
+    let buffer = '';
+    emulator.add_listener('serial0-output-byte', (byte) => {
+      if (greeted) return;
+      buffer = (buffer + String.fromCharCode(byte)).slice(-64);
+      if (/[#%]\s$/.test(buffer)) {
+        greeted = true;
+        setStatus('Linux ready — your files are in /mnt.');
+        emulator.serial0_send('cd /mnt && ls\n');
+      }
+    });
+
+    setupScaleToFill(emulator);
+    setupKeyboard(emulator);
+  }
+
+  // Scale the emulated display to fill its container's width. v86 renders the
+  // buildroot console at a fixed 80×25 text grid; screen_set_scale applies a CSS
+  // transform (and matching box size) so the terminal grows with the layout
+  // column instead of overflowing on narrow screens or looking tiny on wide ones.
+  function setupScaleToFill(emulator) {
+    const container = document.getElementById('screen_container');
+    if (!container) return;
+
+    const fit = () => {
+      if (!emulator.screen_adapter) return;
+      const text = container.querySelector('.screen-text');
+      const canvas = container.querySelector('.screen-canvas');
+      const active = text && text.style.display !== 'none' ? text : canvas;
+      if (!active) return;
+
+      // Measure the natural (unscaled) size, then scale to the content width.
+      emulator.screen_set_scale(1, 1);
+      const natural = active.getBoundingClientRect().width;
+      if (!natural) return;
+      const style = getComputedStyle(container);
+      const padX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+      const available = container.clientWidth - padX;
+      const scale = Math.max(0.5, Math.min(available / natural, 4));
+      emulator.screen_set_scale(scale, scale);
+    };
+
+    const schedule = () => requestAnimationFrame(fit);
+    emulator.add_listener('screen-set-size', schedule);
+    window.addEventListener('resize', schedule);
+    schedule();
+  }
+
+  // Respect the host keyboard layout. v86's built-in adapter maps keys purely by
+  // physical position (event.code) to a US PC layout, so non-US host keymaps (and
+  // Mac Option characters) come out wrong. We intercept printable keys in the
+  // capture phase and re-inject the character the host actually produced via
+  // keyboard_send_text, while letting control/navigation keys fall through to
+  // v86's native (position-based) handling, which is correct for those.
+  function setupKeyboard(emulator) {
+    const editable = (el) =>
+      el &&
+      (el.tagName === 'INPUT' ||
+        el.tagName === 'TEXTAREA' ||
+        el.tagName === 'SELECT' ||
+        el.isContentEditable);
+    // Modifiers we synthesize per-character (via keyboard_send_text) and must
+    // therefore hide from v86, so the guest's shift/alt state stays clean.
+    const swallow = new Set(['Shift', 'Alt', 'AltGraph', 'CapsLock']);
+    const isPrintable = (e) => e.key && e.key.length === 1 && !e.ctrlKey;
+
+    const handler = (e) => {
+      if (editable(e.target)) return;
+      // Leave Cmd/Win shortcuts (copy, paste, …) to the browser/OS.
+      if (e.metaKey) {
+        e.stopImmediatePropagation();
+        return;
+      }
+      if (swallow.has(e.key)) {
+        e.stopImmediatePropagation();
+        return;
+      }
+      if (isPrintable(e)) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        if (e.type === 'keydown') emulator.keyboard_send_text(e.key);
+      }
+    };
+
+    // Capture phase so this runs before v86's window listener and can block it.
+    window.addEventListener('keydown', handler, true);
+    window.addEventListener('keyup', handler, true);
+  }
+
+  boot();
+</script>
