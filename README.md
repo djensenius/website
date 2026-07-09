@@ -37,9 +37,23 @@ just dev        # start the dev server
 just build      # build the production static site
 just preview    # preview the production build
 just check      # format + lint + type-check (Vite+ and astro check)
-just image      # build the emulator disk image (Dockerized) — WIP (#33)
+just image      # build the emulator disk image from Markdown (Dockerized, #33)
 just serve      # run the self-host container — WIP (#38)
 ```
+
+## Emulator disk image
+
+`just image` regenerates the emulator's bootable disk image from the Markdown content,
+replacing the old manual `sudo mount -o loop` editing. The build:
+
+1. `scripts/gen-emulator-content.mjs` strips frontmatter from `src/content/**` and writes a
+   plain-text tree (`bio.txt`, `projects/<id>.txt`, `code/repos.txt`, …).
+2. `scripts/build-image.sh` copies the pristine base rootfs (`root.bin`) and, inside a
+   Docker container with `e2tools`, swaps in the freshly generated `/root` content — no
+   privileged loop mount required — writing `public/emulator/root.bin`.
+
+Markdown stays the single source of truth for both the file-navigation view and the
+emulator. Re-run `just image` and commit `public/emulator/root.bin` after editing content.
 
 ## Legacy
 
