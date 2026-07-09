@@ -5,7 +5,3 @@ just = "1.53.0"
 [env]
 # Loads variables from a local .env file (gitignored). Copy .env.example to .env.
 _.file = ".env"
-
-[settings]
-# Auto-install missing tools when entering the directory.
-experimental = true
