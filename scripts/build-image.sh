@@ -16,17 +16,26 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
+# Resolve a path to an absolute one so BASE_IMAGE/OUT_IMAGE overrides may be
+# either relative (to the repo root) or absolute.
+abspath() { case "$1" in /*) printf '%s' "$1" ;; *) printf '%s/%s' "$repo_root" "$1" ;; esac; }
+
 base_image="${BASE_IMAGE:-root.bin}"
 out_image="${OUT_IMAGE:-public/emulator/root.bin}"
 out_dir="$(dirname "$out_image")"
 out_name="$(basename "$out_image")"
 staging="build/emulator-root"
 
-# Pin the builder image by digest so the same commit keeps producing the same
-# disk image over time (e2tools 0.1.0-r2 on alpine 3.20).
+# Pin the builder image by digest and the e2tools package version so the same
+# commit keeps producing the same disk image over time.
 builder="alpine@sha256:d9e853e87e55526f6b2917df91a2115c36dd7c696a35be12163d44e6e2a4b6bc"
+e2tools_version="0.1.0-r2"
 
-if [[ ! -f "$base_image" ]]; then
+base_abs="$(abspath "$base_image")"
+out_dir_abs="$(abspath "$out_dir")"
+staging_abs="$(abspath "$staging")"
+
+if [[ ! -f "$base_abs" ]]; then
   echo "error: base image '$base_image' not found" >&2
   exit 1
 fi
@@ -35,15 +44,16 @@ echo "==> Generating content text from Markdown"
 node scripts/gen-emulator-content.mjs "$staging"
 
 echo "==> Injecting content into a copy of $base_image"
-mkdir -p "$out_dir"
+mkdir -p "$out_dir_abs"
 
 docker run --rm \
   -e OUT_NAME="$out_name" \
-  -v "$repo_root/$base_image:/base.bin:ro" \
-  -v "$repo_root/$staging:/content:ro" \
-  -v "$repo_root/$out_dir:/out" \
+  -e E2TOOLS_VERSION="$e2tools_version" \
+  -v "$base_abs:/base.bin:ro" \
+  -v "$staging_abs:/content:ro" \
+  -v "$out_dir_abs:/out" \
   "$builder" sh -euc '
-    apk add --no-progress -q e2tools >/dev/null
+    apk add --no-progress -q "e2tools=$E2TOOLS_VERSION" >/dev/null
     img="/out/$OUT_NAME"
     cp /base.bin "$img"
 

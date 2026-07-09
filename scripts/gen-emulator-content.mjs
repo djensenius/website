@@ -22,9 +22,10 @@ export function parse(md) {
   return { fm: parseFrontmatter(m[1]), body: m[2].trim() };
 }
 
-// Minimal YAML reader for the small, flat frontmatter this repo uses: scalar
-// `key: value` pairs plus the `repos:` list of `{ name, url }` items. Not a
-// general YAML parser — just enough for the content schema.
+// Minimal YAML reader for this repo's frontmatter: scalar `key: value` pairs
+// plus the `repos:` list of `{ name, url }` items. Other list-style keys such as
+// `tags:` are intentionally ignored — they aren't needed in the plain-text
+// emulator output. Not a general YAML parser.
 export function parseFrontmatter(src) {
   const fm = {};
   const lines = src.split('\n');
