@@ -1,0 +1,247 @@
+---
+// File-navigation island (issue #22).
+// The interactive, artistic file browser that graduates the Phase 1 spike
+// (src/pages/spike/files.astro). It fetches the build-time manifest (issue #21),
+// renders an ls-style directory tree, and loads file content on demand from the
+// static fallback routes (issue #23) so it degrades gracefully and shares one
+// source of rendered HTML. Deep-links via the URL hash (e.g. #/projects/<id>).
+// Vanilla TS by design — the spike showed no framework is warranted here.
+const base = import.meta.env.BASE_URL;
+const bioHref = `${base}files/bio`.replace(/\/{2,}/g, '/');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Files — David Jensenius</title>
+    <meta name="description" content="Browse the work of David Jensenius." />
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        background: #0b0b0b;
+        color: #d7d7d7;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        display: grid;
+        grid-template-columns: 20rem 1fr;
+        min-height: 100vh;
+      }
+      nav {
+        border-right: 1px solid #222;
+        padding: 1rem;
+        overflow-y: auto;
+      }
+      nav h2 {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #6a6a6a;
+      }
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      li {
+        padding: 0.1rem 0;
+      }
+      li.dir {
+        color: #7aa2f7;
+        margin-top: 0.5rem;
+      }
+      li.file {
+        padding-left: 1rem;
+      }
+      a.entry {
+        all: unset;
+        cursor: pointer;
+        color: #b9f27a;
+      }
+      a.entry:hover,
+      a.entry:focus-visible {
+        text-decoration: underline;
+        outline: none;
+      }
+      a.entry[aria-current='page'] {
+        color: #fff;
+        font-weight: 700;
+      }
+      main {
+        padding: 2rem;
+        max-width: 72ch;
+      }
+      main a {
+        color: #7aa2f7;
+      }
+      .prompt {
+        color: #6a6a6a;
+      }
+      .media {
+        margin-top: 2rem;
+        display: grid;
+        gap: 1.5rem;
+      }
+      .media img {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #222;
+      }
+      .media audio {
+        width: 100%;
+      }
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body data-base={base}>
+    <nav aria-label="Files">
+      <h2>~ / david</h2>
+      <ul id="tree">
+        <li class="prompt">Loading…</li>
+      </ul>
+    </nav>
+    <main id="viewer" aria-live="polite" tabindex="-1">
+      <p class="prompt" id="empty">Select a file to <code>cat</code> it.</p>
+      <noscript>
+        <p>
+          JavaScript is off. Browse the files directly starting at
+          <a href={bioHref}>bio</a>.
+        </p>
+      </noscript>
+    </main>
+
+    <script>
+      type FsNode = {
+        path: string;
+        name: string;
+        kind: 'dir' | 'file';
+        title?: string;
+        year?: number;
+      };
+      type Manifest = { generatedAt: string; nodes: FsNode[] };
+
+      const base = document.body.dataset.base ?? '/';
+      const join = (...parts: string[]) => (base + parts.join('/')).replace(/\/{2,}/g, '/');
+
+      const tree = document.getElementById('tree') as HTMLUListElement;
+      const viewer = document.getElementById('viewer') as HTMLElement;
+      const empty = document.getElementById('empty') as HTMLElement;
+
+      let files: FsNode[] = [];
+
+      function render(nodes: FsNode[]) {
+        tree.replaceChildren();
+        for (const node of nodes) {
+          const li = document.createElement('li');
+          if (node.kind === 'dir') {
+            li.className = 'dir';
+            li.textContent = `${node.name}/`;
+          } else {
+            li.className = 'file';
+            const a = document.createElement('a');
+            a.className = 'entry';
+            a.href = `#${node.path}`;
+            a.dataset.path = node.path;
+            a.textContent = node.name;
+            li.append(a);
+          }
+          tree.append(li);
+        }
+      }
+
+      function markCurrent(path: string | null) {
+        for (const a of tree.querySelectorAll<HTMLAnchorElement>('a.entry')) {
+          if (a.dataset.path === path) a.setAttribute('aria-current', 'page');
+          else a.removeAttribute('aria-current');
+        }
+      }
+
+      async function open(path: string) {
+        const node = files.find((f) => f.path === path);
+        if (!node) return;
+        empty.hidden = true;
+        markCurrent(path);
+        viewer.querySelector('article')?.remove();
+        const loading = document.createElement('p');
+        loading.className = 'prompt';
+        loading.textContent = `cat ${path}…`;
+        viewer.append(loading);
+        try {
+          const res = await fetch(join('files', path.replace(/^\//, '')));
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const html = await res.text();
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          const article = doc.querySelector('article');
+          loading.remove();
+          if (article) {
+            viewer.append(article);
+            viewer.focus();
+          }
+        } catch (err) {
+          loading.remove();
+          const p = document.createElement('p');
+          p.className = 'prompt';
+          p.textContent = `Could not load ${path}: ${(err as Error).message}`;
+          viewer.append(p);
+        }
+      }
+
+      function currentIndex(): number {
+        const active = tree.querySelector<HTMLAnchorElement>('a.entry[aria-current="page"]');
+        const entries = [...tree.querySelectorAll<HTMLAnchorElement>('a.entry')];
+        return active ? entries.indexOf(active) : -1;
+      }
+
+      function move(delta: number) {
+        const entries = [...tree.querySelectorAll<HTMLAnchorElement>('a.entry')];
+        if (entries.length === 0) return;
+        const next = Math.max(0, Math.min(entries.length - 1, currentIndex() + delta));
+        const target = entries[next];
+        target.focus();
+        location.hash = target.dataset.path ?? '';
+      }
+
+      function fromHash() {
+        const path = location.hash.replace(/^#/, '');
+        if (path) void open(path);
+        else {
+          markCurrent(null);
+          empty.hidden = false;
+        }
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          move(1);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          move(-1);
+        }
+      });
+
+      window.addEventListener('hashchange', fromHash);
+
+      (async () => {
+        try {
+          const res = await fetch(join('manifest.json'));
+          const manifest: Manifest = await res.json();
+          files = manifest.nodes.filter((n) => n.kind === 'file');
+          render(manifest.nodes);
+          fromHash();
+        } catch (err) {
+          tree.replaceChildren();
+          const li = document.createElement('li');
+          li.className = 'prompt';
+          li.textContent = `Failed to load manifest: ${(err as Error).message}`;
+          tree.append(li);
+        }
+      })();
+    </script>
+  </body>
+</html>
