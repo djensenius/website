@@ -1,10 +1,11 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+import { z } from 'astro:schema';
 import { glob } from 'astro/loaders';
 
 // A link rendered alongside a page or project (e.g. "More information").
 const link = z.object({
   label: z.string(),
-  url: z.string().url(),
+  url: z.url(),
 });
 
 // A media asset (image or audio) associated with a project. Images require alt
@@ -60,7 +61,7 @@ const code = defineCollection({
       .array(
         z.object({
           name: z.string(),
-          url: z.string().url(),
+          url: z.url(),
           description: z.string().optional(),
         }),
       )
