@@ -29,7 +29,30 @@ image_tag="djensenius-v86-image-builder"
 work_volume="djensenius-v86-buildroot-work"
 
 mkdir -p "$work_dir" "$dl_dir" "$out_dir"
-docker volume create "$work_volume" >/dev/null
+
+# Where the Buildroot tree lives (mounted at /work in the container):
+#   - Locally (default): a Docker named volume — required to avoid the glibc
+#     stamp.os/virtiofs mtime bug on macOS/OrbStack bind mounts.
+#   - In CI (V86_WORK_DIR set): a host path bind mount. CI runners are native
+#     Linux ext4, so the mtime bug doesn't apply, and a host path lets
+#     actions/cache persist the compiled toolchain + packages across runs.
+if [[ -n "${V86_WORK_DIR:-}" ]]; then
+  # Bind-mount mode is CI-only. On macOS the glibc stamp.os dependency tracking
+  # breaks on OrbStack/virtiofs mtime semantics, so hard-error rather than let a
+  # local user hit the confusing "No rule to make target .../stamp.os" failure.
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    echo "error: V86_WORK_DIR (bind-mount mode) is unsupported on macOS — glibc's" >&2
+    echo "       stamp.os tracking breaks on OrbStack/virtiofs. Unset V86_WORK_DIR" >&2
+    echo "       to use the default named volume; bind-mount mode is CI-only." >&2
+    exit 1
+  fi
+  mkdir -p "$V86_WORK_DIR"
+  work_mount_src="$(cd "$V86_WORK_DIR" && pwd)"
+  echo "==> Using bind-mounted work tree: ${work_mount_src}"
+else
+  docker volume create "$work_volume" >/dev/null
+  work_mount_src="$work_volume"
+fi
 
 echo "==> Building Docker builder image"
 docker build \
@@ -38,16 +61,20 @@ docker build \
   -t "$image_tag" \
   "$src_dir"
 
-echo "==> Running Buildroot build (tree in volume ${work_volume}, dl cache in ${dl_dir})"
+echo "==> Running Buildroot build (tree in ${work_mount_src}, dl cache in ${dl_dir})"
 # Docker initialises named volumes as root:root; hand it to the unprivileged
-# builder uid/gid so the in-container build (which must not run as root) can write.
-docker run --rm -u 0:0 --entrypoint chown -v "${work_volume}:/work" "$image_tag" \
-  -R "$(id -u):$(id -g)" /work
+# builder uid/gid so the in-container build (which must not run as root) can
+# write. A bind-mounted host dir (V86_WORK_DIR, i.e. CI) is already owned by the
+# invoking user, so skip the (slow, recursive) chown fixup in that case.
+if [[ -z "${V86_WORK_DIR:-}" ]]; then
+  docker run --rm -u 0:0 --entrypoint chown -v "${work_mount_src}:/work" "$image_tag" \
+    -R "$(id -u):$(id -g)" /work
+fi
 docker run --rm \
   -e "CLEAN_TARGET=${CLEAN_TARGET:-0}" \
   -e "BR_VERSION=${BR_VERSION:-}" \
   -v "${repo_root}/${src_dir}:/src:ro" \
-  -v "${work_volume}:/work" \
+  -v "${work_mount_src}:/work" \
   -v "${repo_root}/${dl_dir}:/dl" \
   -v "${repo_root}/${out_dir}:/out" \
   "$image_tag"

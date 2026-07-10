@@ -67,11 +67,44 @@ jobs:
           restore-keys: |
             v86-dl-
 
+      # Cache the compiled Buildroot tree (cross toolchain + built packages) so a
+      # re-build doesn't recompile glibc + Rust `bat` from scratch (~45 min cold →
+      # ~5-10 min warm). This replicates what the local Docker named volume does;
+      # CI runners are native Linux ext4, so the macOS-only stamp.os/virtiofs bug
+      # that forces the named volume locally doesn't apply here — a bind-mounted
+      # host path (V86_WORK_DIR) is used instead so actions/cache can persist it.
+      # The regeneratable rootfs (target/staging/images) is trimmed before save
+      # (see below) and always rebuilt clean via CLEAN_TARGET=1, so only the
+      # expensive-to-produce toolchain + package objects are cached.
+      - name: Cache Buildroot tree
+        uses: actions/cache@v6
+        with:
+          path: build/v86-image/work
+          key: v86-work-${{ hashFiles('scripts/v86-image/**', 'scripts/build-v86-image.sh') }}
+          restore-keys: |
+            v86-work-
+
       - name: Build image
+        env:
+          # Bind-mount the work tree to a host path so the cache above persists it.
+          V86_WORK_DIR: build/v86-image/work
+          # Always rebuild the rootfs from scratch (keeps compiled packages, wipes
+          # target/staging/images) so a restored tree can never carry stale files.
+          CLEAN_TARGET: '1'
         run: just v86-image
 
       - name: Smoke test (boot + 9p mount)
         run: node scripts/v86-smoke.mjs
+
+      # Drop the regeneratable rootfs trees before actions/cache saves the work
+      # dir, so the cached artifact stays lean (toolchain + package objects only).
+      # CLEAN_TARGET=1 recreates these on the next run.
+      - name: Trim cache footprint
+        if: always()
+        run: |
+          rm -rf build/v86-image/work/*/output/target \
+                 build/v86-image/work/*/output/staging \
+                 build/v86-image/work/*/output/images || true
 
       - name: Upload image artifact
         uses: actions/upload-artifact@v7
