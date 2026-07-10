@@ -98,7 +98,7 @@ const filesHref = clean(`${base}/files/`);
 
 <script is:inline define:vars={{ active, terminalHref, filesHref }}>
   (function () {
-    // Only manifest-style paths (/bio, /projects/<id>, /code/<id>) are carried
+    // Only manifest-style paths (/info/<id>, /projects/<id>) are carried
     // between modes — never arbitrary strings — so the value is safe to build a
     // URL and a shell `cat` command from on the other side.
     const isPath = (p) => /^\/[A-Za-z0-9][A-Za-z0-9/_-]*$/.test(p);

@@ -14,20 +14,17 @@ import { getCollection, render } from 'astro:content';
 
 const pages = (await getCollection('pages')).sort((a, b) => a.data.order - b.data.order);
 const projects = (await getCollection('projects')).sort((a, b) => a.id.localeCompare(b.id));
-const code = (await getCollection('code')).sort((a, b) => a.id.localeCompare(b.id));
 
 // Virtual filesystem tree for the sidebar listing.
 const tree = [
+  { kind: 'dir' as const, label: 'info' },
   ...pages.map((e) => ({ kind: 'file' as const, label: e.data.title, key: `pages:${e.id}` })),
   { kind: 'dir' as const, label: 'projects' },
   ...projects.map((e) => ({ kind: 'file' as const, label: e.id, key: `projects:${e.id}` })),
-  { kind: 'dir' as const, label: 'code' },
-  ...code.map((e) => ({ kind: 'file' as const, label: e.id, key: `code:${e.id}` })),
 ];
 
 const pageBodies = await Promise.all(pages.map(async (e) => ({ e, r: await render(e) })));
 const projectBodies = await Promise.all(projects.map(async (e) => ({ e, r: await render(e) })));
-const codeBodies = await Promise.all(code.map(async (e) => ({ e, r: await render(e) })));
 ---
 
 <!doctype html>
@@ -140,21 +137,6 @@ const codeBodies = await Promise.all(code.map(async (e) => ({ e, r: await render
           <article data-file={`projects:${e.id}`} tabindex="-1">
             <h1>{e.data.title}</h1>
             {e.data.year && <p class="prompt">{e.data.year}</p>}
-            <Content />
-          </article>
-        ))
-      }
-      {
-        codeBodies.map(({ e, r: { Content } }) => (
-          <article data-file={`code:${e.id}`} tabindex="-1">
-            <h1>{e.data.title}</h1>
-            <ul>
-              {e.data.repos.map((repo) => (
-                <li>
-                  <a href={repo.url}>{repo.name}</a>
-                </li>
-              ))}
-            </ul>
             <Content />
           </article>
         ))

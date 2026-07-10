@@ -3,8 +3,8 @@
 // One pre-rendered HTML page per content file, derived from the build-time
 // manifest (issue #21). These give every file a crawlable, no-JS, accessible URL
 // that the file-navigation island (issue #22) can deep-link to and that search
-// engines can index. Paths mirror the virtual filesystem: /files/bio,
-// /files/projects/<id>, /files/code/<id>.
+// engines can index. Paths mirror the virtual filesystem: /files/info/bio,
+// /files/projects/<id>.
 import { getEntry, render } from 'astro:content';
 import ModeToggle from '../../components/ModeToggle.astro';
 import { buildManifest, fileNodes, type FsNode } from '../../lib/filesystem';
@@ -34,10 +34,7 @@ if (!entry) {
 }
 const { Content } = await render(entry);
 
-const repos =
-  node.collection === 'code' && 'repos' in entry.data
-    ? (entry.data.repos as { name: string; url: string }[])
-    : [];
+const links = 'links' in entry.data ? entry.data.links : [];
 
 const fileHref = (path: string) =>
   `${import.meta.env.BASE_URL}files/${path.replace(/^\//, '')}`.replace(/\/{2,}/g, '/');
@@ -82,11 +79,11 @@ const fileHref = (path: string) =>
         <h1>{node.title}</h1>
         {node.year && <p class="prompt">{node.year}</p>}
         {
-          repos.length > 0 && (
+          links.length > 0 && (
             <ul>
-              {repos.map((repo) => (
+              {links.map((link) => (
                 <li>
-                  <a href={repo.url}>{repo.name}</a>
+                  <a href={link.url}>{link.label}</a>
                 </li>
               ))}
             </ul>

@@ -52,21 +52,4 @@ const projects = defineCollection({
   }),
 });
 
-// Code repositories listing (data-driven).
-const code = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/code' }),
-  schema: z.object({
-    title: z.string(),
-    repos: z
-      .array(
-        z.object({
-          name: z.string(),
-          url: z.url(),
-          description: z.string().optional(),
-        }),
-      )
-      .default([]),
-  }),
-});
-
-export const collections = { pages, projects, code };
+export const collections = { pages, projects };
