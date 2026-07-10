@@ -1,7 +1,8 @@
 # Overrides applied on top of base.config (merged via merge_config.sh, then
 # `make olddefconfig`). base.config is the upstream browser-buildroot "standard"
 # config; this fragment tailors it for djensenius.com's embedded v86 emulator:
-# a single self-contained bzImage with just the requested modern CLI tools.
+# a non-SMP bzImage plus a separate gzip-compressed initramfs, with just the
+# requested modern CLI tools.
 
 # --- Output: a standalone gzip-compressed initramfs, loaded by v86 as a ------
 # separate `initrd` (NOT embedded in the bzImage). v86's real-mode bzImage

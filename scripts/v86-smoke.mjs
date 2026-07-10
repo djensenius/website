@@ -7,7 +7,7 @@ const url = (p) => join(dir, p);
 
 const emulator = new V86({
   wasm_path: url('v86.wasm'),
-  memory_size: 512 * 1024 * 1024,
+  memory_size: 256 * 1024 * 1024,
   vga_memory_size: 2 * 1024 * 1024,
   bios: { url: url('bios/seabios.bin') },
   vga_bios: { url: url('bios/vgabios.bin') },

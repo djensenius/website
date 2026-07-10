@@ -2,7 +2,7 @@
 # Buildroot refuses to run as root, so we build as an unprivileged user.
 FROM debian:bookworm-slim
 
-# Buildroot + Linux kernel + host-rust (for bat/eza) build dependencies.
+# Buildroot + Linux kernel + host-rust (for bat) build dependencies.
 RUN apt-get update && apt-get install -y --no-install-recommends \
       bash bc binutils bison build-essential bzip2 ca-certificates cpio \
       file flex g++ gawk gcc git gzip libelf-dev libncurses-dev libssl-dev \

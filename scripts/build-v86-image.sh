@@ -9,7 +9,8 @@
 # The heavy Buildroot tree and download cache are kept under build/v86-image so
 # repeat builds are incremental. Requires Docker. Usage:
 #   ./scripts/build-v86-image.sh          # build + install the image
-#   KEEP_GOING=1 ./scripts/build-v86-image.sh   # don't overwrite on failure
+#   CLEAN_TARGET=1 ./scripts/build-v86-image.sh # wipe target/staging first so
+#                                               # disabled packages leave the rootfs
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

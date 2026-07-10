@@ -48,14 +48,14 @@ const screenId = `screen_container-${uid}`;
     try {
       ({ V86 } = await import(config.libPath));
     } catch (err) {
-      setStatus('Failed to load the emulator — use the link below.');
+      setStatus('Failed to load the emulator. Please reload the page.');
       console.error(err);
       return;
     }
 
     const emulator = new V86({
       wasm_path: config.wasmPath,
-      memory_size: 512 * 1024 * 1024,
+      memory_size: 256 * 1024 * 1024,
       vga_memory_size: 2 * 1024 * 1024,
       screen_container: document.getElementById(screenId),
       bios: { url: config.bios },
