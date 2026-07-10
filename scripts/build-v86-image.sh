@@ -54,9 +54,13 @@ docker build \
 
 echo "==> Running Buildroot build (tree in ${work_mount_src}, dl cache in ${dl_dir})"
 # Docker initialises named volumes as root:root; hand it to the unprivileged
-# builder uid/gid so the in-container build (which must not run as root) can write.
-docker run --rm -u 0:0 --entrypoint chown -v "${work_mount_src}:/work" "$image_tag" \
-  -R "$(id -u):$(id -g)" /work
+# builder uid/gid so the in-container build (which must not run as root) can
+# write. A bind-mounted host dir (V86_WORK_DIR, i.e. CI) is already owned by the
+# invoking user, so skip the (slow, recursive) chown fixup in that case.
+if [[ -z "${V86_WORK_DIR:-}" ]]; then
+  docker run --rm -u 0:0 --entrypoint chown -v "${work_mount_src}:/work" "$image_tag" \
+    -R "$(id -u):$(id -g)" /work
+fi
 docker run --rm \
   -e "CLEAN_TARGET=${CLEAN_TARGET:-0}" \
   -e "BR_VERSION=${BR_VERSION:-}" \
