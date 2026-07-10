@@ -1,7 +1,23 @@
 ---
+const defaultPlausibleSrc = 'https://plausible.io/js/script.js';
 const plausibleDomain = import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN?.trim();
-const plausibleSrc =
-  import.meta.env.PUBLIC_PLAUSIBLE_SRC?.trim() || 'https://plausible.io/js/script.js';
+const configuredPlausibleSrc = import.meta.env.PUBLIC_PLAUSIBLE_SRC?.trim();
+const plausibleSrc = isAllowedScriptSrc(configuredPlausibleSrc)
+  ? configuredPlausibleSrc
+  : defaultPlausibleSrc;
+
+function isAllowedScriptSrc(src: string | undefined): src is string {
+  if (!src) return false;
+  if (/^[a-zA-Z][a-zA-Z\d+.-]*:/.test(src)) {
+    try {
+      const { protocol } = new URL(src);
+      return protocol === 'http:' || protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }
+  return !src.startsWith('//') && !src.startsWith('\\');
+}
 ---
 
 {

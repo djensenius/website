@@ -53,10 +53,10 @@ just serve      # run the self-host container — WIP (#38)
 ## Analytics
 
 Analytics are privacy-friendly and opt-in. By default, no analytics script is emitted and
-nothing tracks visitors. To enable a Plausible-compatible provider, set
-`PUBLIC_PLAUSIBLE_DOMAIN` to the configured site domain at build time. Optionally set
-`PUBLIC_PLAUSIBLE_SRC` to a self-hosted Plausible/Umami-compatible script URL; otherwise it
-defaults to `https://plausible.io/js/script.js`.
+nothing tracks visitors. To enable Plausible, set `PUBLIC_PLAUSIBLE_DOMAIN` to the
+configured site domain at build time. Optionally set `PUBLIC_PLAUSIBLE_SRC` to a
+self-hosted Plausible script URL; otherwise it defaults to
+`https://plausible.io/js/script.js`.
 
 For GitHub Pages deploys, these public build-time environment variables can be added to the
 build step in [`.github/workflows/deploy-preview.yml`](.github/workflows/deploy-preview.yml).
