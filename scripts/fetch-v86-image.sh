@@ -15,11 +15,15 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
 tag="${V86_IMAGE_TAG:-emulator-image}"
+# Default to the upstream repo so the fetch works from forks too (where the
+# `emulator-image` release doesn't exist); override with V86_IMAGE_REPO if needed.
+repo="${V86_IMAGE_REPO:-djensenius/website}"
 dest="public/emulator/v86"
 
 mkdir -p "$dest"
-echo "==> Downloading emulator image assets from release '${tag}'"
+echo "==> Downloading emulator image assets from ${repo} release '${tag}'"
 gh release download "$tag" \
+  --repo "$repo" \
   --pattern 'buildroot-bzimage.bin' \
   --pattern 'buildroot-initrd.bin' \
   --dir "$dest" \
