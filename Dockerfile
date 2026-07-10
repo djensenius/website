@@ -57,7 +57,7 @@ RUN base="https://github.com/${V86_IMAGE_REPO}/releases/download/${V86_IMAGE_TAG
     && for pair in "buildroot-bzimage.bin:${V86_BZIMAGE_SHA256}" "buildroot-initrd.bin:${V86_INITRD_SHA256}"; do \
          f="${pair%%:*}"; sha="${pair#*:}"; \
          echo "==> Fetching ${f}"; \
-         curl -fsSL "${base}/${f}" -o "public/emulator/v86/${f}"; \
+         curl --retry 5 --retry-delay 2 --retry-all-errors -fsSL "${base}/${f}" -o "public/emulator/v86/${f}"; \
          test -s "public/emulator/v86/${f}"; \
          if [ -n "$sha" ]; then \
            echo "${sha}  public/emulator/v86/${f}" | sha256sum -c -; \
