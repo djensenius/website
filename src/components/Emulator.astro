@@ -128,6 +128,23 @@ const noteId = `terminal-note-${uid}`;
       if (/[#$%]\s$/.test(buffer)) {
         greeted = true;
         setStatus('System ready');
+        // Focus the terminal screen once the shell is up so keystrokes are
+        // captured by our layout-aware handler (which re-injects the host's
+        // actual characters — Colemak, AltGr, etc.) instead of falling through
+        // to v86's US position mapping. Only take focus if the user hasn't
+        // already moved it elsewhere (e.g. tabbed to a button), so the a11y
+        // focus model still holds.
+        const screenContainer = document.getElementById(screenId);
+        if (screenContainer && window.__v86ActiveScreen === screenId) {
+          const active = document.activeElement;
+          if (!active || active === document.body) {
+            try {
+              screenContainer.focus({ preventScroll: true });
+            } catch {
+              screenContainer.focus();
+            }
+          }
+        }
         // The browser shows the VGA text console (the interactive shell the user
         // sees and types into), while serial0 is only used here to detect that
         // the shell is up. So inject the deep-link command as *keyboard* input so
