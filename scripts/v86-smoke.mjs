@@ -42,7 +42,7 @@ const timer = setInterval(async () => {
     await emulator.destroy();
     process.exit(2);
   }
-  if (stage === 0 && /[#%]\s*$/.test(out.slice(-8))) {
+  if (stage === 0 && /[#$%]\s*$/.test(out.slice(-8))) {
     stage = 1;
     out = '';
     send('ls /mnt && echo LISTED && head -3 /mnt/bio.txt && echo DONE_MARKER');

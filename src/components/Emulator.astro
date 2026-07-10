@@ -103,7 +103,7 @@ const screenId = `screen_container-${uid}`;
     emulator.add_listener('serial0-output-byte', (byte) => {
       if (greeted) return;
       buffer = (buffer + String.fromCharCode(byte)).slice(-64);
-      if (/[#%]\s$/.test(buffer)) {
+      if (/[#$%]\s$/.test(buffer)) {
         greeted = true;
         setStatus('System ready');
         // The browser shows the VGA text console (the interactive shell the user
