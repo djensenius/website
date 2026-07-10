@@ -7,5 +7,4 @@ tags:
   - cryptography
 ---
 
-A three-part series about encrypting messages in music. Inspired by the Voynich
-Manuscript.
+A three-part series about encrypting messages in music. Inspired by the Voynich Manuscript.

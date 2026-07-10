@@ -1,18 +1,8 @@
----
-title: Telephone Booth (St. Anne's)
-year: 2026
-summary: A site-specific rotary pay phone installation for St. Anne's Anglican Church in Toronto, gathering and recombining voices around loss, rebuilding, and chance communion.
-tags:
-  - installation
-  - interactive
-  - telephony
-  - sound
-links:
-  - label: Source (Rust rewrite)
-    url: https://github.com/djensenius/Telephone-Booth
-media: []
-status: complete
----
+# Telephone Booth (St. Anne's) (2026)
+
+A site-specific rotary pay phone installation for St. Anne's Anglican Church in Toronto, gathering and recombining voices around loss, rebuilding, and chance communion.
+
+- [Source (Rust rewrite)](https://github.com/djensenius/Telephone-Booth)
 
 A rotary pay phone and booth wait inside St. Anne's Anglican Church, Toronto: an obsolete public technology placed in a sanctuary transformed by fire. The plate promises free calls. Dial 1 to answer a question and leave a message; dial 2 to hear a stranger's answer returned without its original prompt.
 

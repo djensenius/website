@@ -1,13 +1,6 @@
----
-title: Return of the Wumpus
-year: 2007
-summary: A follow-up to Capturing the Wumpus with the Wumpus as a knowledge-based agent navigating the space.
-tags:
-  - composition
-  - game
-  - artificial-intelligence
-  - performance
----
+# Return of the Wumpus (2007)
+
+A follow-up to Capturing the Wumpus with the Wumpus as a knowledge-based agent navigating the space.
 
 A follow-up to _Capturing the Wumpus_. As each performer navigates through the space they sense a breeze warning of a pit, or a stench warning of a Wumpus. Sometimes they fall into a pit or are devoured by the Wumpus.
 

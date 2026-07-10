@@ -1,18 +1,8 @@
----
-title: HAT Engine
-year: 2015
-summary: A tool for designing and building augmented-reality sound games, sound walks, and locative installations.
-tags:
-  - tool
-  - augmented-reality
-  - sound-game
-collaborators:
-  - Lauren Burr
-  - Mark Prier
-links:
-  - label: More information
-    url: https://hatengine.com
----
+# HAT Engine (2015)
+
+A tool for designing and building augmented-reality sound games, sound walks, and locative installations.
+
+- [More information](https://hatengine.com)
 
 By Lauren Burr, David Jensenius & Mark Prier.
 

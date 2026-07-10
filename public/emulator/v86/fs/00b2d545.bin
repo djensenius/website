@@ -1,13 +1,6 @@
----
-title: Four Stochastic (Virtual) Plants for Auditory and Visual Observation
-year: 2008
-summary: An L-system generates four virtual plants, each with a unique sonic identity, forming a collage of growth sounds.
-tags:
-  - composition
-  - generative
-  - l-system
-  - visual
----
+# Four Stochastic (Virtual) Plants for Auditory and Visual Observation (2008)
+
+An L-system generates four virtual plants, each with a unique sonic identity, forming a collage of growth sounds.
 
 This work explores simple algorithmic genetic creation of plants in a virtual environment. The L-system ruleset exists as follows:
 
