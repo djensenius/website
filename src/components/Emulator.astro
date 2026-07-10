@@ -48,7 +48,7 @@ const screenId = `screen_container-${uid}`;
     try {
       ({ V86 } = await import(config.libPath));
     } catch (err) {
-      setStatus('Failed to load the emulator. Please reload the page.');
+      setStatus('Failed to load the emulator. Switch to Files above to browse the site.');
       console.error(err);
       return;
     }
