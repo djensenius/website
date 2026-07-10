@@ -14,8 +14,11 @@
 #   /out   -> build/v86-image/out      (bzImage lands here)
 set -euo pipefail
 
-# Buildroot LTS pinned to the series the base config was generated against; this
-# patch level is the first that ships the bat package we enable.
+# Buildroot version. NOTE: base.config's header reads "2024.02.5" because that
+# is the release its defconfig was captured under, but we build against
+# 2024.02.10 on purpose — it is the first 2024.02 patch release that ships the
+# `bat` package we enable. The two are defconfig-compatible (`make olddefconfig`
+# reconciles them), so the mismatch in the header is expected, not drift.
 BR_VERSION="${BR_VERSION:-2024.02.10}"
 BR_URL="https://buildroot.org/downloads/buildroot-${BR_VERSION}.tar.gz"
 
