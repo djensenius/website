@@ -47,7 +47,7 @@ just v86-fetch  # download the prebuilt v86 emulator image from the emulator-ima
 just v86-image  # rebuild the v86 emulator image from source (Dockerized, long)
 just v86-fs     # regenerate the v86 WASM emulator filesystem from Markdown (#37)
 just v86-smoke  # boot the v86 emulator headless and verify content mounts (#37)
-just serve      # run the self-host container — WIP (#38)
+just serve      # build & run the optional self-host container (Docker, #38)
 ```
 
 ## Analytics
@@ -64,6 +64,32 @@ subpath deploys. Empty or unset `PUBLIC_PLAUSIBLE_SRC` defaults to
 For GitHub Pages deploys, these public build-time environment variables can be added to the
 build step in [`.github/workflows/deploy-preview.yml`](.github/workflows/deploy-preview.yml).
 Do not hardcode a domain in source.
+
+## Self-hosting (optional)
+
+Production is served from **GitHub Pages** (#30). As an optional backup/experiment, the
+site can also run as a container on the DeskPi rack (issue #38). It's a multi-stage build:
+Node builds the static Astro output, then [Caddy](https://caddyserver.com/) serves plain
+`dist/` files with clean URLs and compression — no Node runtime in the final image.
+
+```bash
+just serve                     # docker compose up --build → http://localhost:8080
+# or directly:
+docker compose up -d --build   # detached
+docker compose down            # stop
+```
+
+The build fetches the uncommitted emulator kernel/initrd from the public `emulator-image`
+release automatically (no auth needed), so the terminal boots in the served site.
+
+Configuration (all optional, via env or compose args):
+
+- `SITE_URL` — Astro `site` (default `https://jensenius.com`); sets canonical/sitemap URLs.
+- `BASE_PATH` — Astro `base` (default `/` for root-served self-host).
+- `HTTP_PORT` — host port to publish (default `8080`).
+
+To enable Plausible analytics in the container, pass `PUBLIC_PLAUSIBLE_DOMAIN` (and
+optionally `PUBLIC_PLAUSIBLE_SRC`) as build args — see **Analytics** above.
 
 ## WASM emulator (v86)
 

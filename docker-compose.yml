@@ -1,0 +1,18 @@
+# Self-host the modernized site on the DeskPi rack (issue #38). Optional backup;
+# production stays on GitHub Pages (#30).
+#
+#   docker compose up -d --build      # build + serve on http://<host>:8080
+#   docker compose down               # stop
+services:
+  web:
+    build:
+      context: .
+      # Root-served self-host defaults. Override to build for a subpath, e.g.
+      # BASE_PATH=/website, or point at a fork's emulator-image release.
+      args:
+        SITE_URL: ${SITE_URL:-https://jensenius.com}
+        BASE_PATH: ${BASE_PATH:-/}
+    image: djensenius-website
+    restart: unless-stopped
+    ports:
+      - '${HTTP_PORT:-8080}:80'

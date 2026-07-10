@@ -1,0 +1,24 @@
+# Keep the Docker build context small and reproducible. The image runs `npm ci`
+# and fetches the emulator binaries itself, so local installs/artifacts are
+# excluded — the lockfile in git is the source of truth.
+.git
+node_modules
+dist
+.astro
+
+# Local env / editor / OS cruft
+.env
+.env.*
+!.env.example
+.DS_Store
+
+# Uncommitted emulator binaries — the Dockerfile pulls these from the public
+# release during the build, so any local copies shouldn't bloat the context.
+public/emulator/v86/buildroot-bzimage.bin
+public/emulator/v86/buildroot-initrd.bin
+
+# Heavy build tooling not needed to build the static site.
+scripts/v86-image
+root
+root.bin
+jslinux-mobile
