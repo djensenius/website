@@ -13,7 +13,7 @@ import '../../styles/file-view.css';
 export async function getStaticPaths() {
   const manifest = await buildManifest();
   return fileNodes(manifest).map((node) => ({
-    // node.path is absolute ("/bio", "/projects/x"); strip the leading slash.
+    // node.path is absolute ("/info/bio", "/projects/x"); strip the leading slash.
     params: { path: node.path.replace(/^\//, '') },
     // Pass the full node list through props so each route reuses one manifest
     // walk instead of rebuilding it per page during static generation.

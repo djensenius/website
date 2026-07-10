@@ -137,7 +137,9 @@ import '../../styles/file-view.css';
         const path = location.hash.replace(/^#/, '');
         if (path) void open(path);
         else {
-          location.hash = '/info/bio';
+          const defaultPath = '/info/bio';
+          history.replaceState(null, '', `#${defaultPath}`);
+          void open(defaultPath);
         }
       }
 
