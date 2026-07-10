@@ -32,6 +32,8 @@ BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.6.37"
 # --- Requested tools --------------------------------------------------------
 BR2_PACKAGE_VIM=y
 BR2_PACKAGE_BAT=y
+# less: pager for `cat`/`bat` so long files open at the top and can be scrolled.
+BR2_PACKAGE_LESS=y
 
 # --- Trim upstream extras (smaller image + faster build) --------------------
 # olddefconfig re-enables anything vim/bat actually require.

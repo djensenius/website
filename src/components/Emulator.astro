@@ -85,7 +85,7 @@ const scrollbackId = `scrollback-${uid}`;
     // Deep-link support (issue #35): the mode toggle / a shared link can request
     // a specific file be opened in the terminal via ?open=/projects/<id>. The
     // Files view and this terminal keep the same manifest paths, mapped here to
-    // the guest filesystem as /mnt<path>.txt. Only strict manifest-style paths
+    // the guest filesystem as /mnt<path>.md. Only strict manifest-style paths
     // are accepted, so the value is safe to splice into the `cat` command below.
     const openTarget = () => {
       const raw = new URLSearchParams(location.search).get('open');
@@ -108,7 +108,7 @@ const scrollbackId = `scrollback-${uid}`;
     const target = openTarget();
     // Content is copied into $HOME on login, but /mnt always holds the pristine
     // tree, so open from there. `cat` is aliased to `bat` in the image.
-    if (target) setup.push(`cat /mnt${target}.txt`);
+    if (target) setup.push(`cat /mnt${target}.md`);
 
     let greeted = false;
     let buffer = '';
