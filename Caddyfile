@@ -12,8 +12,21 @@
 
 	file_server
 
-	# Long-cache the fingerprinted build assets and the large emulator payloads;
-	# HTML stays uncached so content updates show up immediately.
-	@immutable path /_astro/* /emulator/v86/*
-	header @immutable Cache-Control "public, max-age=31536000, immutable"
+	# Cache policy, keyed to whether the URL is content-addressed:
+	#   * /_astro/* — Astro fingerprints these filenames, so cache forever.
+	#   * /emulator/v86/* — large but NOT fingerprinted (fs.json, kernel, initrd),
+	#     so cache modestly (1 day) to pick up release updates without refetching
+	#     ~24 MB on every visit.
+	#   * everything else (HTML/clean URLs) — revalidate so content edits show up
+	#     immediately.
+	# The three matchers are mutually exclusive, so each response gets exactly one
+	# Cache-Control.
+	@fingerprinted path /_astro/*
+	header @fingerprinted Cache-Control "public, max-age=31536000, immutable"
+
+	@emulator_assets path /emulator/v86/*
+	header @emulator_assets Cache-Control "public, max-age=86400"
+
+	@dynamic not path /_astro/* /emulator/v86/*
+	header @dynamic Cache-Control "no-cache"
 }
