@@ -42,10 +42,18 @@
   background: #000;
   border: 1px solid var(--e-border);
   padding: 0.5rem;
-  /* The boot script scales the display to fit this container (width and height),
-   * so the terminal fills the available space. Clip any sub-pixel rounding
-   * overflow rather than showing a scrollbar. */
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  box-sizing: border-box;
+  /* The boot script scales the display to fit this container and then sizes the
+   * container to the scaled grid. Clip any sub-pixel rounding overflow rather
+   * than showing a scrollbar. */
   overflow: hidden;
+}
+
+.emulator .screen.is-fitted {
+  flex: 0 1 auto;
 }
 
 /* Text (pre-boot / serial) screen mode. v86 toggles the inline `display` of the
@@ -65,6 +73,70 @@
    * glyph descenders (g, y, p, …) below the baseline. Matches upstream v86. */
   line-height: normal;
   color: var(--e-fg);
+  cursor: text;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.emulator .screen .screen-canvas {
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+
+.emulator .terminal-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  color: var(--e-muted);
+  font-size: 0.8rem;
+}
+
+.emulator .terminal-actions button {
+  border: 1px solid var(--e-border);
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--e-fg);
+  font: inherit;
+  padding: 0.25rem 0.5rem;
+}
+
+.emulator .terminal-actions button:hover,
+.emulator .terminal-actions button:focus-visible {
+  border-color: var(--e-link);
+  color: var(--e-link);
+}
+
+.emulator .terminal-note {
+  color: var(--e-muted);
+}
+
+.emulator .scrollback {
+  flex: 0 0 auto;
+  margin-top: 0.5rem;
+  min-height: 0;
+}
+
+.emulator .scrollback[hidden] {
+  display: none;
+}
+
+.emulator .scrollback-buffer {
+  max-height: 12rem;
+  overflow: auto;
+  margin: 0;
+  border: 1px solid var(--e-border);
+  background: #000;
+  color: var(--e-fg);
+  padding: 0.5rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  white-space: pre;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .emulator .fallback {

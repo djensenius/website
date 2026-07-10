@@ -24,6 +24,7 @@ import '../styles/emulator.css';
 const uid = crypto.randomUUID().slice(0, 8);
 const statusId = `status-${uid}`;
 const screenId = `screen_container-${uid}`;
+const scrollbackId = `scrollback-${uid}`;
 ---
 
 <div class="emulator">
@@ -35,9 +36,19 @@ const screenId = `screen_container-${uid}`;
     <div class="screen-text" style="display: block"></div>
     <canvas class="screen-canvas" style="display: none"></canvas>
   </div>
+  <div class="terminal-actions" role="group" aria-label="Terminal tools">
+    <button type="button" class="copy-visible">Copy visible text</button>
+    <button type="button" class="scrollback-toggle" aria-controls={scrollbackId} aria-expanded="false">
+      Show scrollback
+    </button>
+    <span class="terminal-note">Selection works in DOM text mode; VGA/canvas text can be copied with the button.</span>
+  </div>
+  <div id={scrollbackId} class="scrollback" hidden>
+    <pre class="scrollback-buffer" tabindex="0" aria-label="Emulator scrollback"></pre>
+  </div>
 </div>
 
-<script is:inline define:vars={{ config, statusId, screenId }}>
+<script is:inline define:vars={{ config, statusId, screenId, scrollbackId }}>
   const statusEl = document.getElementById(statusId);
   const setStatus = (text) => {
     if (statusEl) statusEl.textContent = text;
@@ -69,6 +80,7 @@ const screenId = `screen_container-${uid}`;
 
     setupKeyboard(emulator);
     const refit = setupScaleToFill(emulator);
+    setupTerminalTools(emulator);
 
     // Deep-link support (issue #35): the mode toggle / a shared link can request
     // a specific file be opened in the terminal via ?open=/projects/<id>. The
@@ -122,10 +134,10 @@ const screenId = `screen_container-${uid}`;
     });
   }
 
-  // Scale the emulated display to fit its container. v86 renders the buildroot
-  // console at a fixed 80×25 text grid; screen_set_scale applies a CSS transform
-  // so the terminal fills the available space (both width and height) instead of
-  // sitting tiny in the corner or overflowing.
+  // Scale the emulated display to fit the available width/height, then shrink
+  // the host .screen box to the scaled display height. v86's text grid is fixed
+  // (usually 80×25), so this keeps resize-to-fit behavior while avoiding a tall
+  // black container with the real terminal stranded at the top.
   function setupScaleToFill(emulator) {
     const container = document.getElementById(screenId);
     if (!container) return;
@@ -152,20 +164,27 @@ const screenId = `screen_container-${uid}`;
       const text = container.querySelector('.screen-text');
       const canvas = container.querySelector('.screen-canvas');
 
-      // Reset to 1:1 so the measurement reflects the unscaled display.
+      // Reset to 1:1 and let flexbox re-expand the screen so measurement uses
+      // the currently available space, not the last fitted height.
+      container.classList.remove('is-fitted');
+      container.style.blockSize = '';
       emulator.screen_set_scale(1, 1);
       const natural = naturalSize(text, canvas);
       if (!natural.w || !natural.h) return false;
       const style = getComputedStyle(container);
       const padX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
       const padY = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+      const borderY = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
       const availW = container.clientWidth - padX;
       const availH = container.clientHeight - padY;
-      // Fit to whichever dimension is the tighter constraint so the whole
-      // terminal stays visible while filling as much space as possible. No lower
-      // clamp: `.screen` clips overflow, so the display must always fit.
-      const scale = Math.min(availW / natural.w, availH / natural.h, 6);
+      // Fit to whichever dimension is tighter so the whole terminal stays
+      // visible. Cap extreme upscales because v86's fixed grid gets comically
+      // large on tall/wide displays, and because smaller capped sizes make the
+      // letterbox intentional rather than looking like missing content.
+      const scale = Math.min(availW / natural.w, availH / natural.h, 4);
       emulator.screen_set_scale(scale, scale);
+      container.style.blockSize = `${Math.ceil(natural.h * scale + padY + borderY)}px`;
+      container.classList.add('is-fitted');
       return true;
     };
 
@@ -181,6 +200,173 @@ const screenId = `screen_container-${uid}`;
     window.addEventListener('resize', schedule);
     attempt();
     return fit;
+  }
+
+  function setupTerminalTools(emulator) {
+    const container = document.getElementById(screenId);
+    const root = container && container.closest('.emulator');
+    if (!container || !root) return;
+
+    const textScreen = container.querySelector('.screen-text');
+    const copyButton = root.querySelector('.copy-visible');
+    const toggleButton = root.querySelector('.scrollback-toggle');
+    const scrollbackPanel = document.getElementById(scrollbackId);
+    const scrollbackBuffer = scrollbackPanel && scrollbackPanel.querySelector('.scrollback-buffer');
+    const MAX_SCROLLBACK_LINES = 2000;
+
+    // v86's mouse adapter listens on the screen container. In DOM text mode,
+    // keep mouse events on .screen-text available for native browser selection.
+    const preserveSelection = (event) => {
+      window.__v86ActiveScreen = screenId;
+      if (event.type === 'mousemove' && event.buttons === 0) return;
+      event.stopPropagation();
+    };
+    if (textScreen) {
+      for (const type of ['pointerdown', 'mousedown', 'mousemove', 'mouseup', 'selectstart']) {
+        textScreen.addEventListener(type, preserveSelection, true);
+      }
+    }
+
+    const readRows = () =>
+      emulator.screen_adapter && emulator.screen_adapter.get_text_screen
+        ? emulator.screen_adapter.get_text_screen().map((row) => row.trimEnd())
+        : [];
+    const visibleText = () => readRows().join('\n').trimEnd();
+
+    const selectionInside = () => {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed || !selection.toString()) return false;
+      return root.contains(selection.anchorNode) || root.contains(selection.focusNode);
+    };
+
+    const setCopyFeedback = (message) => {
+      if (!copyButton) return;
+      copyButton.dataset.originalLabel ||= copyButton.textContent;
+      copyButton.textContent = message;
+      setTimeout(() => {
+        copyButton.textContent = copyButton.dataset.originalLabel;
+      }, 1200);
+    };
+
+    const copyWithTextarea = (text) => {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.insetBlockStart = '0';
+      textarea.style.insetInlineStart = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      let copied = false;
+      try {
+        copied = document.execCommand('copy');
+      } catch {
+        copied = false;
+      } finally {
+        textarea.remove();
+      }
+      return copied;
+    };
+
+    const copyText = async (text) => {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch {
+        // Fall through to the legacy path for insecure contexts or denied permissions.
+      }
+      return copyWithTextarea(text);
+    };
+
+    if (copyButton) {
+      copyButton.addEventListener('click', async () => {
+        const selected = selectionInside() ? window.getSelection().toString() : '';
+        const text = selected || visibleText();
+        if (!text) return;
+        if (await copyText(text)) {
+          setCopyFeedback('Copied');
+        } else {
+          setCopyFeedback('Copy failed');
+          setStatus('Copy failed. Select text and use your browser copy shortcut.');
+        }
+      });
+    }
+
+    let scrollback = [];
+    let previousRows = [];
+    let captureQueued = false;
+
+    const renderScrollback = () => {
+      if (!scrollbackBuffer || (scrollbackPanel && scrollbackPanel.hidden)) return;
+      const previousTop = scrollbackBuffer.scrollTop;
+      const wasAtBottom =
+        scrollbackBuffer.scrollHeight - scrollbackBuffer.scrollTop - scrollbackBuffer.clientHeight < 8;
+      const rows = readRows();
+      const content = scrollback.concat(rows).join('\n').trimEnd();
+      scrollbackBuffer.textContent = content || 'Scrollback will appear after the console starts producing output.';
+      scrollbackBuffer.scrollTop = wasAtBottom ? scrollbackBuffer.scrollHeight : previousTop;
+    };
+
+    const appendLines = (lines) => {
+      if (!lines.length) return;
+      scrollback.push(...lines);
+      if (scrollback.length > MAX_SCROLLBACK_LINES) {
+        scrollback = scrollback.slice(scrollback.length - MAX_SCROLLBACK_LINES);
+      }
+      renderScrollback();
+    };
+
+    const scrolledLineCount = (before, after) => {
+      const max = Math.min(before.length, after.length) - 1;
+      for (let count = 1; count <= max; count++) {
+        let matches = true;
+        for (let row = count; row < before.length; row++) {
+          if (before[row] !== after[row - count]) {
+            matches = false;
+            break;
+          }
+        }
+        if (matches) return count;
+      }
+      return 0;
+    };
+
+    const capture = () => {
+      captureQueued = false;
+      const rows = readRows();
+      if (!rows.length) return;
+      if (previousRows.length === rows.length) {
+        const count = scrolledLineCount(previousRows, rows);
+        if (count) appendLines(previousRows.slice(0, count));
+      }
+      previousRows = rows;
+      renderScrollback();
+    };
+
+    const scheduleCapture = () => {
+      if (captureQueued) return;
+      captureQueued = true;
+      requestAnimationFrame(() => requestAnimationFrame(capture));
+    };
+
+    if (toggleButton && scrollbackPanel) {
+      toggleButton.addEventListener('click', () => {
+        const opening = scrollbackPanel.hidden;
+        scrollbackPanel.hidden = !opening;
+        toggleButton.setAttribute('aria-expanded', String(opening));
+        toggleButton.textContent = opening ? 'Hide scrollback' : 'Show scrollback';
+        if (opening) renderScrollback();
+      });
+    }
+
+    emulator.add_listener('screen-put-char', scheduleCapture);
+    emulator.add_listener('screen-set-size', () => {
+      previousRows = [];
+      scheduleCapture();
+    });
+    setTimeout(scheduleCapture, 500);
   }
 
   // Respect the host keyboard layout. v86's built-in adapter maps keys purely by
@@ -215,6 +401,7 @@ const screenId = `screen_container-${uid}`;
     // The first instance to boot is active by default; clicking another one's
     // screen makes it active. The active screenId lives on a shared window key.
     const container = document.getElementById(screenId);
+    const root = container && container.closest('.emulator');
     if (window.__v86ActiveScreen === undefined) window.__v86ActiveScreen = screenId;
     if (container) {
       container.addEventListener('pointerdown', () => {
@@ -222,12 +409,23 @@ const screenId = `screen_container-${uid}`;
       });
     }
     const isActive = () => window.__v86ActiveScreen === screenId;
+    const selectedInside = () => {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed || !selection.toString()) return false;
+      return root && (root.contains(selection.anchorNode) || root.contains(selection.focusNode));
+    };
 
     const handler = (e) => {
       if (!isActive()) return;
       if (editable(e.target)) return;
-      // Leave Cmd/Win shortcuts (copy, paste, …) entirely alone so the browser,
-      // OS, and any other page listeners still receive them.
+      if ((e.metaKey || e.ctrlKey) && e.key && e.key.toLowerCase() === 'c' && selectedInside()) {
+        e.stopImmediatePropagation();
+        return;
+      }
+      // Leave Cmd/Win shortcuts (copy, paste, …) alone so the browser, OS, and
+      // any other page listeners still receive them. The exception is selected
+      // emulator text above: Cmd/Ctrl+C is stopped there so the guest does not
+      // also receive the copy shortcut as input.
       if (e.metaKey) return;
       if (swallow.has(e.key)) {
         e.stopImmediatePropagation();
