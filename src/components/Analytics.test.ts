@@ -3,7 +3,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test } from 'vitest';
 
-test.sequential('invalid analytics script source is ignored when analytics is disabled', () => {
+test('invalid analytics script source is ignored when analytics is disabled', () => {
   buildSite({
     PUBLIC_PLAUSIBLE_DOMAIN: undefined,
     PUBLIC_PLAUSIBLE_SRC: 'javascript:alert(1)',
@@ -14,7 +14,7 @@ test.sequential('invalid analytics script source is ignored when analytics is di
   expect(html).not.toContain('plausible.io/js/script.js');
 }, 120_000);
 
-test.sequential('default analytics script is emitted when analytics is enabled', () => {
+test('default analytics script is emitted when analytics is enabled', () => {
   buildSite({
     PUBLIC_PLAUSIBLE_DOMAIN: 'example.com',
     PUBLIC_PLAUSIBLE_SRC: undefined,
@@ -25,16 +25,16 @@ test.sequential('default analytics script is emitted when analytics is enabled',
   expect(html).toContain('src="https://plausible.io/js/script.js"');
 }, 120_000);
 
-test.sequential('invalid analytics script source fails the build when analytics is enabled', () => {
+test('invalid analytics script source fails the build when analytics is enabled', () => {
   expect(() =>
     buildSite({
       PUBLIC_PLAUSIBLE_DOMAIN: 'example.com',
-      PUBLIC_PLAUSIBLE_SRC: 'javascript:alert(1)',
+      PUBLIC_PLAUSIBLE_SRC: 'https:example.com/js/script.js',
     }),
   ).toThrow(/Invalid PUBLIC_PLAUSIBLE_SRC/);
 }, 120_000);
 
-test.sequential('empty analytics script source falls back to the default when analytics is enabled', () => {
+test('empty analytics script source falls back to the default when analytics is enabled', () => {
   buildSite({
     PUBLIC_PLAUSIBLE_DOMAIN: 'example.com',
     PUBLIC_PLAUSIBLE_SRC: '   ',

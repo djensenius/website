@@ -19,8 +19,10 @@ function isAllowedScriptSrc(src: string): boolean {
   if (!src) return false;
   if (src.startsWith('/')) return !src.startsWith('//');
   try {
-    const { protocol } = new URL(src);
-    return protocol === 'https:' || (import.meta.env.DEV && protocol === 'http:');
+    const { hostname, protocol } = new URL(src);
+    if (!hostname) return false;
+    if (protocol === 'https:') return src.toLowerCase().startsWith('https://');
+    return import.meta.env.DEV && protocol === 'http:' && src.toLowerCase().startsWith('http://');
   } catch {
     return false;
   }
