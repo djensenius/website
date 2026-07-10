@@ -249,10 +249,10 @@ const scrollbackId = `scrollback-${uid}`;
 
     const setCopyFeedback = (message) => {
       if (!copyButton) return;
-      const original = copyButton.textContent;
+      copyButton.dataset.originalLabel ||= copyButton.textContent;
       copyButton.textContent = message;
       setTimeout(() => {
-        copyButton.textContent = original;
+        copyButton.textContent = copyButton.dataset.originalLabel;
       }, 1200);
     };
 
