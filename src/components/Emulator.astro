@@ -347,7 +347,10 @@ const scrollbackId = `scrollback-${uid}`;
       if (!rows.length) return;
       if (previousRows.length === rows.length) {
         const count = scrolledLineCount(previousRows, rows);
-        if (count) appendLines(previousRows.slice(0, count));
+        if (count) {
+          const scrolledOff = previousRows.slice(0, count);
+          if (scrolledOff.some((line) => /\S/.test(line))) appendLines(scrolledOff);
+        }
       }
       previousRows = rows;
       renderScrollback();
