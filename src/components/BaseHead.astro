@@ -1,0 +1,55 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  canonical?: string;
+  path?: string;
+  type?: string;
+}
+
+const {
+  title,
+  description,
+  image = '/og.png',
+  canonical,
+  path,
+  type = 'website',
+} = Astro.props;
+
+const siteName = 'David Jensenius';
+const site = Astro.site?.href ?? Astro.url.origin;
+const base = import.meta.env.BASE_URL || '/';
+const basePath = `/${base.replace(/^\/+|\/+$/g, '')}/`.replace(/\/{2,}/g, '/');
+const baseWithoutSlash = basePath.replace(/^\/+/, '');
+
+const isAbsoluteUrl = (value: string) => /^https?:\/\//i.test(value);
+
+function absoluteUrl(value: string) {
+  if (isAbsoluteUrl(value)) return value;
+
+  const cleanValue = value.replace(/^\/+/, '');
+  if (baseWithoutSlash && cleanValue.startsWith(baseWithoutSlash)) {
+    return new URL(`/${cleanValue}`, site).href;
+  }
+
+  return new URL(`${basePath}${cleanValue}`, site).href;
+}
+
+const canonicalUrl = absoluteUrl(canonical ?? path ?? Astro.url.pathname);
+const imageUrl = absoluteUrl(image);
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalUrl} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:image" content={imageUrl} />
+<meta property="og:site_name" content={siteName} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageUrl} />
