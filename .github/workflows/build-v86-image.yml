@@ -1,0 +1,84 @@
+name: Build v86 emulator image
+
+# Builds the custom Buildroot image for the in-browser v86 emulator and
+# publishes the two binaries (bzimage + initrd, ~24 MB) as assets on the rolling
+# `emulator-image` prerelease. They are intentionally NOT committed to git; CI,
+# the Pages deploy, and local dev fetch them via `just v86-fetch`.
+#
+# This only runs when the image sources change (or on manual dispatch), so
+# ordinary content pushes never pay for the long Buildroot build. On success it
+# reuses the Pages deploy workflow so the freshly built image ships right away.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/v86-image/**'
+      - 'scripts/build-v86-image.sh'
+      - '.github/workflows/build-v86-image.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: v86-image
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build & publish emulator image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create/update the emulator-image release + its assets
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # Buildroot needs ~10 GB; reclaim space from preinstalled toolchains.
+      - name: Free up disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          sudo docker image prune --all --force || true
+          df -h /
+
+      - name: Set up tools (mise → Node, just)
+        uses: jdx/mise-action@v4
+
+      # Cache Buildroot's download folder so re-builds don't refetch the whole
+      # toolchain/kernel/package tarballs. Keyed on the config so a config change
+      # still reuses unrelated downloads via restore-keys.
+      - name: Cache Buildroot downloads
+        uses: actions/cache@v4
+        with:
+          path: build/v86-image/dl
+          key: v86-dl-${{ hashFiles('scripts/v86-image/config.fragment', 'scripts/v86-image/base.config', 'scripts/build-v86-image.sh') }}
+          restore-keys: |
+            v86-dl-
+
+      - name: Build image
+        run: just v86-image
+
+      - name: Smoke test (boot + 9p mount)
+        run: node scripts/v86-smoke.mjs
+
+      - name: Publish to emulator-image release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view emulator-image >/dev/null 2>&1 || \
+            gh release create emulator-image \
+              --prerelease \
+              --title "Emulator image (rolling)" \
+              --notes "Prebuilt v86 Buildroot image assets (bzimage + initrd) consumed by CI/deploy. Auto-updated by the build-v86-image workflow. Not a software release — an artifact store keeping the binaries out of git history."
+          gh release upload emulator-image \
+            public/emulator/v86/buildroot-bzimage.bin \
+            public/emulator/v86/buildroot-initrd.bin \
+            --clobber
+
+  deploy:
+    name: Deploy site with the new image
+    needs: build
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/deploy-preview.yml

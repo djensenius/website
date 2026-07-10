@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Reusable: the build-v86-image workflow calls this after publishing a fresh
+  # emulator image so the new image ships immediately.
+  workflow_call:
 
 permissions:
   contents: read
@@ -33,6 +36,14 @@ jobs:
 
       - name: Install dependencies
         run: just install
+
+      # The v86 emulator image (bzimage + initrd) is not committed to git; pull
+      # it from the rolling `emulator-image` release so the built site includes a
+      # bootable emulator. See scripts/fetch-v86-image.sh.
+      - name: Fetch emulator image
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: just v86-fetch
 
       - name: Build
         # site + base come from the Pages deployment so links resolve under the

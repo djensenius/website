@@ -26,8 +26,13 @@ cd website
 mise install             # installs the pinned Node version
 cp .env.example .env     # optional local overrides
 just install             # install dependencies
+just v86-fetch           # download the prebuilt emulator image (bzimage + initrd)
 just dev                 # run the site locally with live reload
 ```
+
+> The v86 emulator's `buildroot-bzimage.bin` / `buildroot-initrd.bin` (~24 MB)
+> are not committed to git — `just v86-fetch` pulls them from the `emulator-image`
+> release (built by CI). Run it once after cloning, or the emulator won't boot.
 
 ## Common tasks
 
@@ -38,6 +43,8 @@ just build      # build the production static site
 just preview    # preview the production build
 just check      # format + lint + type-check (Vite+ and astro check)
 just image      # build the legacy emulator disk image from Markdown (Dockerized, #33)
+just v86-fetch  # download the prebuilt v86 emulator image from the emulator-image release
+just v86-image  # rebuild the v86 emulator image from source (Dockerized, long)
 just v86-fs     # regenerate the v86 WASM emulator filesystem from Markdown (#37)
 just v86-smoke  # boot the v86 emulator headless and verify content mounts (#37)
 just serve      # run the self-host container — WIP (#38)
@@ -55,12 +62,19 @@ Content is generated from Markdown into v86's JSON/HTTP 9p filesystem format:
    the disk image) and emits `public/emulator/v86/fs.json` plus a content-addressed
    `public/emulator/v86/fs/<hash>.bin` body store.
 2. The page (`src/pages/emulator/index.astro`) loads the committed v86 runtime
-   (`v86.wasm`, `libv86.mjs`), SeaBIOS, and the `buildroot-bzimage.bin` kernel, then mounts
-   the 9p filesystem so the visitor lands in their files at `/mnt`.
+   (`v86.wasm`, `libv86.mjs`), SeaBIOS, and the `buildroot-bzimage.bin` kernel plus
+   `buildroot-initrd.bin` userland, then mounts the 9p filesystem so the visitor lands in
+   their files at `/mnt`.
 
-The runtime and kernel binaries under `public/emulator/v86/` are committed (they can't be
-regenerated from Markdown). Re-run `just v86-fs` and commit `fs.json` + `fs/` after editing
-content. `just v86-smoke` boots the emulator headless (Node) and asserts the content mounts.
+The v86 runtime, SeaBIOS and VGABIOS binaries under `public/emulator/v86/` are committed
+(small, stable third-party assets). The two large Buildroot artifacts —
+`buildroot-bzimage.bin` (kernel) and `buildroot-initrd.bin` (userland) — are **not**
+committed: they are built by the [`build-v86-image`](.github/workflows/build-v86-image.yml)
+workflow whenever `scripts/v86-image/**` changes and published to the rolling
+`emulator-image` release. `just v86-fetch` downloads them; `just v86-image` rebuilds them
+from source locally (Dockerized). Re-run `just v86-fs` and commit `fs.json` + `fs/` after
+editing content. `just v86-smoke` boots the emulator headless (Node) and asserts the
+content mounts.
 
 These binaries are third-party (v86, SeaBIOS, VGABIOS, and a buildroot Linux kernel); their
 licenses and source pointers are documented in

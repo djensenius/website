@@ -50,8 +50,17 @@ image:
 # djensenius-themed login). Writes public/emulator/v86/buildroot-bzimage.bin
 # and buildroot-initrd.bin.
 # Long, Dockerized build; the Buildroot tree is cached under build/v86-image.
+# In CI this runs in the build-v86-image workflow, which publishes the result
+# to the rolling `emulator-image` release (see v86-fetch).
 v86-image:
     ./scripts/build-v86-image.sh
+
+# Fetch the prebuilt v86 image (bzimage + initrd) from the `emulator-image`
+# release into public/emulator/v86/. These binaries are not committed to git;
+# run this once after cloning (or after a fresh checkout) to get a bootable
+# emulator locally. Requires the `gh` CLI.
+v86-fetch:
+    ./scripts/fetch-v86-image.sh
 
 # Regenerate the v86 WASM emulator's 9p filesystem from Markdown (issue #37).
 # Writes public/emulator/v86/fs.json and public/emulator/v86/fs/. No Docker needed.
