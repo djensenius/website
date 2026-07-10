@@ -1,0 +1,98 @@
+---
+title: cv-tech
+order: 3
+description: David Jensenius — technical curriculum vitae.
+---
+
+David Jensenius\
+(519) 591-4799 — [david@jensenius.com](mailto:david@jensenius.com)
+
+## Profile
+
+Full stack developer with extensive experience taking projects from ideas to
+shipping products. Develops REST and GraphQL APIs and front-end applications that
+interact with those endpoints. Knowledgeable in a breadth of languages and
+development methodologies.
+
+## Skills
+
+- **Programming Languages** — JavaScript / TypeScript, Ruby, Go, Swift,
+  Objective-C, Java.
+- **Frameworks** — React, Angular, Next.js, Vue.js.
+- **Database** — GraphQL, PostgreSQL, MySQL, Redis, MongoDB.
+
+## Experience
+
+### 2025–Present — Staff Full Stack Software Engineer, GitHub. Kitchener ON
+
+### 2022–2025 — Senior Full Stack Software Engineer, GitHub. Kitchener ON
+
+- Launched GitHub Copilot for Individuals, Businesses, and Enterprises.
+- Engineered the design for seat and policy management for businesses and
+  enterprises managing access to Copilot features.
+- Contributed to Ruby and Rails core as a member of the Rails Architecture team.
+- Built tools for organizations to manage seat assignments and settings for
+  individual users of GitHub Copilot.
+- Coordinated between multiple teams to migrate from a Rails to a React front end.
+- Worked closely with the design team to implement design specs and ensure edge
+  cases are covered.
+- Delivered high-quality, well-tested code under tight deadlines in a demanding
+  work environment.
+
+### 2019–2022 — Front End Software Engineer, Sony Interactive Entertainment. Waterloo ON
+
+- Led the initiative to migrate the PlayStation Store from JavaScript to
+  TypeScript.
+- Set up development best practices such as linting and unit test coverage
+  requirements.
+- Scrum master for various teams ranging in size from 6 to 24 people.
+- Rebuilt the underlying cart and wallet code in a new package that can be used
+  across multiple platforms.
+- Worked with many teams to develop complex features that touch every aspect of
+  the PlayStation experience.
+- Built complex applications for use in a memory-limited environment.
+
+### 2016–2018 — Full Stack Software Engineer, Shopify. Waterloo ON
+
+- Built Shopify Flow, an automation tool and visual programming language for
+  merchants to customize their stores and automate their supply management chains,
+  from a rough concept to a shipping product.
+- Participated in design sprints.
+- Present for UX research sessions.
+- Trained, mentored, and evaluated student interns.
+
+### 2016 — Full Stack Software Engineer, Boltmade (acquired by Shopify). Waterloo ON
+
+- Built a parking management system using a .NET backend and an Angular front end.
+
+### 2001–2016 — Full Stack Software Engineer, Social Psychology Network. Middletown CT
+
+- Created and managed educational web-based tools about sexism, racism, and other
+  forms of prejudice and discrimination.
+- Managed a small team of developers.
+- Managed a team of student interns and QA testers.
+- Worked with world-renowned social psychologists such as Philip Zimbardo, Susan
+  Fiske, David Dunning, and many others to preserve their work to the web.
+- Created tools used in classrooms and for homework assignments internationally.
+
+### 2008–Present — Media Artist
+
+- Work independently and collaborate with small and large groups.
+- Build media art pieces and sound compositions using a variety of technologies
+  and custom-built software.
+- Created FoundSounds — a worldwide social network and collaborative art project.
+  - Technology used: React, Rust, Go, NodeJS, Ruby on Rails, Swift, GraphQL,
+    PostgreSQL, MySQL, MongoDB, Redis, AWS, Objective-C, AngularJS, SuperCollider,
+    Processing, PHP.
+- Many projects are open source at
+  [github.com/djensenius](https://github.com/djensenius).
+
+## Education
+
+- **2008** — Master of Arts, Music. Wesleyan University, Middletown CT.
+- **2001** — Bachelor of Science, Computer Science. Millersville University,
+  Millersville PA.
+
+## References
+
+Available upon request.

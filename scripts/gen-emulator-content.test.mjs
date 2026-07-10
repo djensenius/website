@@ -25,9 +25,9 @@ test('parseFrontmatter reads the links list', () => {
   ]);
 });
 
-test('renderPage underlines the title', () => {
+test('renderPage renders the title as a Markdown heading', () => {
   const out = renderPage({ id: 'bio', fm: { title: 'bio' }, body: 'About me.' });
-  expect(out).toBe('bio\n===\n\nAbout me.\n');
+  expect(out).toBe('# bio\n\nAbout me.\n');
 });
 
 test('renderProject includes year and summary', () => {
@@ -41,8 +41,8 @@ test('renderProject includes year and summary', () => {
     },
     body: 'Body text.',
   });
-  expect(out).toContain('Telephone Booth (2016)');
+  expect(out).toContain('# Telephone Booth (2016)');
   expect(out).toContain('A phone booth.');
-  expect(out).toContain('Source: https://example.com/source');
+  expect(out).toContain('- [Source](https://example.com/source)');
   expect(out).toContain('Body text.');
 });

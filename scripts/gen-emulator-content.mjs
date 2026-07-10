@@ -1,11 +1,12 @@
-// Generate the emulator's plain-text content tree from the Markdown content
+// Generate the emulator's Markdown content tree from the Markdown content
 // collections (issue #33). Markdown stays the single source of truth: this
-// strips frontmatter and writes readable `.txt` files mirroring the virtual
-// filesystem, which scripts/build-image.sh injects into the bootable disk image.
+// strips frontmatter and writes `.md` files mirroring the virtual filesystem,
+// which scripts/build-image.sh injects into the bootable disk image. Shipping
+// Markdown (rather than plain text) lets the guest's `bat` syntax-highlight it.
 //
 // Output layout (under the staging dir passed as argv[2], default build/emulator-root):
-//   info/bio.txt  info/cv.txt  info/contact.txt   (from src/content/pages)
-//   projects/<id>.txt                   (from src/content/projects)
+//   info/bio.md  info/cv-art.md  info/cv-tech.md  info/contact.md  (from src/content/pages)
+//   projects/<id>.md                   (from src/content/projects)
 //   LICENSE                             (copied from root/LICENSE)
 import { readFileSync, readdirSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -68,29 +69,26 @@ function readCollection(name) {
     });
 }
 
-function underline(title) {
-  return `${title}\n${'='.repeat(title.length)}\n`;
-}
-
 function writeFile(outDir, relPath, contents) {
   const full = join(outDir, relPath);
   mkdirSync(dirname(full), { recursive: true });
   writeFileSync(full, contents.endsWith('\n') ? contents : `${contents}\n`);
 }
 
-/** Render a page/project entry to the text body written into the image. */
+/** Render a page entry to the Markdown body written into the image. */
 export function renderPage(page) {
-  return `${underline(page.fm.title ?? page.id)}\n${page.body}\n`;
+  const title = page.fm.title ?? page.id;
+  return `# ${title}\n\n${page.body}\n`;
 }
 
 export function renderProject(project) {
   const header = project.fm.year
     ? `${project.fm.title} (${project.fm.year})`
     : (project.fm.title ?? project.id);
-  const summary = project.fm.summary ? `${project.fm.summary}\n` : '';
-  const links = (project.fm.links ?? []).map((link) => `${link.label}: ${link.url}`).join('\n');
+  const summary = project.fm.summary ? `${project.fm.summary}\n\n` : '';
+  const links = (project.fm.links ?? []).map((link) => `- [${link.label}](${link.url})`).join('\n');
   const linksBlock = links ? `${links}\n\n` : '';
-  return `${underline(header)}\n${summary}\n${linksBlock}${project.body}\n`;
+  return `# ${header}\n\n${summary}${linksBlock}${project.body}\n`;
 }
 
 /**
@@ -109,9 +107,9 @@ export function buildContentTree({ includeLegacyLicense = true } = {}) {
   const push = (path, contents) => {
     files.push({ path, contents: contents.endsWith('\n') ? contents : `${contents}\n` });
   };
-  for (const page of readCollection('pages')) push(`info/${page.id}.txt`, renderPage(page));
+  for (const page of readCollection('pages')) push(`info/${page.id}.md`, renderPage(page));
   for (const project of readCollection('projects')) {
-    push(`projects/${project.id}.txt`, renderProject(project));
+    push(`projects/${project.id}.md`, renderProject(project));
   }
   const license = join(repoRoot, 'root', 'LICENSE');
   if (includeLegacyLicense && existsSync(license)) push('LICENSE', readFileSync(license, 'utf8'));
@@ -128,8 +126,8 @@ function main() {
   const files = buildContentTree();
   for (const { path, contents } of files) writeFile(outDir, path, contents);
 
-  const count = files.filter((f) => f.path.endsWith('.txt')).length;
-  console.log(`Generated ${count} text files into ${outDir}`);
+  const count = files.filter((f) => f.path.endsWith('.md')).length;
+  console.log(`Generated ${count} Markdown files into ${outDir}`);
 }
 
 // Only run the build when invoked directly (not when imported by tests).
