@@ -17,8 +17,10 @@ const config = {
 };
 import '../styles/emulator.css';
 
-// Per-instance element IDs so multiple emulators can coexist on one page and the
-// inline script always binds to its own instance (v86 needs a real element/ID).
+// Per-instance element IDs so the inline script always binds to its own instance
+// (v86 needs a real element/ID). Keyboard and resize handling are routed to a
+// single "active" instance (see setupKeyboard) so the component still behaves if
+// more than one emulator is ever placed on a page.
 const uid = crypto.randomUUID().slice(0, 8);
 const statusId = `status-${uid}`;
 const screenId = `screen_container-${uid}`;
@@ -34,8 +36,8 @@ const screenId = `screen_container-${uid}`;
     <canvas class="screen-canvas" style="display: none"></canvas>
   </div>
   <p class="fallback">
-    Prefer plain HTML, or the emulator won't load? Browse the same content at
-    <a href={filesHref}>/files</a>.
+    Prefer plain HTML, or the emulator won't load?
+    <a href={filesHref}>Browse the same content as plain pages</a>.
   </p>
 </div>
 
@@ -50,7 +52,7 @@ const screenId = `screen_container-${uid}`;
     try {
       ({ V86 } = await import(config.libPath));
     } catch (err) {
-      setStatus('Failed to load the emulator — use the /files link below.');
+      setStatus('Failed to load the emulator — use the link below.');
       console.error(err);
       return;
     }
@@ -192,7 +194,16 @@ const screenId = `screen_container-${uid}`;
     // Modifiers we synthesize per-character (via keyboard_send_text) and must
     // therefore hide from v86, so the guest's shift/alt state stays clean.
     const swallow = new Set(['Shift', 'Alt', 'AltGraph', 'CapsLock']);
-    const isPrintable = (e) => e.key && e.key.length === 1 && !e.ctrlKey;
+    // A single-character key is printable input unless it's a real Ctrl
+    // shortcut. AltGr (reported as ctrlKey+altKey, or via the AltGraph modifier
+    // on Windows/Linux) still produces printable characters, so don't treat
+    // those as control combos — otherwise they'd fall through to v86's US
+    // position mapping and come out wrong.
+    const isPrintable = (e) => {
+      if (!e.key || e.key.length !== 1) return false;
+      const altGr = e.getModifierState('AltGraph') || (e.ctrlKey && e.altKey);
+      return altGr || !e.ctrlKey;
+    };
 
     // Only one emulator on the page is "active" (receives keyboard input) at a
     // time, so multiple instances don't all intercept and duplicate keystrokes.
