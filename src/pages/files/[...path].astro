@@ -6,6 +6,7 @@
 // engines can index. Paths mirror the virtual filesystem: /files/bio,
 // /files/projects/<id>, /files/code/<id>.
 import { getEntry, render } from 'astro:content';
+import ModeToggle from '../../components/ModeToggle.astro';
 import { buildManifest, fileNodes, type FsNode } from '../../lib/filesystem';
 import '../../styles/file-view.css';
 
@@ -51,6 +52,9 @@ const fileHref = (path: string) =>
     {node.summary && <meta name="description" content={node.summary} />}
   </head>
   <body>
+    <div class="modebar">
+      <ModeToggle active="files" />
+    </div>
     <nav aria-label="Files">
       <h2>~ / david</h2>
       <ul>

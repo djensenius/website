@@ -22,9 +22,11 @@ const title = 'David Jensenius';
   <body>
     <div class="shell">
       <header class="masthead">
+        <div class="modebar">
+          <ModeToggle active="terminal" />
+        </div>
         <div class="titlebar">
           <h1>{title}</h1>
-          <ModeToggle active="terminal" />
         </div>
         <p class="tagline">
           Composer and media artist. Switch to <strong>Files</strong> above for plain pages.
@@ -81,12 +83,17 @@ const title = 'David Jensenius';
         margin-bottom: 0.75rem;
       }
 
+      .modebar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        min-height: 2.2rem;
+        margin-bottom: 0.75rem;
+      }
+
       .titlebar {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        flex-wrap: wrap;
       }
 
       .masthead h1 {
