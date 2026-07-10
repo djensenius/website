@@ -12,6 +12,7 @@ import '../../styles/file-view.css';
 
 const base = import.meta.env.BASE_URL;
 const bioHref = `${base}files/info/bio`.replace(/\/{2,}/g, '/');
+const rssHref = `${base}rss.xml`.replace(/\/{2,}/g, '/');
 const title = 'Files — David Jensenius';
 const description =
   'Browse the work, biography, and projects of David Jensenius, composer and media artist.';
@@ -23,6 +24,7 @@ const description =
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <BaseHead title={title} description={description} path="/files/" />
+    <link rel="alternate" type="application/rss+xml" title="David Jensenius RSS" href={rssHref} />
   </head>
   <body data-base={base}>
     <div class="modebar">

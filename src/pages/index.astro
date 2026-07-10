@@ -8,6 +8,7 @@ import Emulator from '../components/Emulator.astro';
 import ModeToggle from '../components/ModeToggle.astro';
 const title = 'David Jensenius';
 const description = 'The work and portfolio of David Jensenius, composer and media artist.';
+const rssHref = `${import.meta.env.BASE_URL}rss.xml`.replace(/\/{2,}/g, '/');
 ---
 
 <!doctype html>
@@ -16,6 +17,7 @@ const description = 'The work and portfolio of David Jensenius, composer and med
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <BaseHead title={title} description={description} path="/" />
+    <link rel="alternate" type="application/rss+xml" title="David Jensenius RSS" href={rssHref} />
   </head>
   <body>
     <div class="shell">
