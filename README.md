@@ -87,9 +87,16 @@ Configuration (all optional, via env or compose args):
 - `SITE_URL` — Astro `site` (default `https://jensenius.com`); sets canonical/sitemap URLs.
 - `BASE_PATH` — Astro `base` (default `/` for root-served self-host).
 - `HTTP_PORT` — host port to publish (default `8080`).
+- `V86_IMAGE_REPO` / `V86_IMAGE_TAG` — where to fetch the emulator binaries from
+  (default `djensenius/website` / `emulator-image`); point at a fork or pin an
+  immutable release tag.
+- `V86_BZIMAGE_SHA256` / `V86_INITRD_SHA256` — optional SHA-256 pins; when set, the
+  downloaded binaries are verified so the build is reproducible and tamper-evident.
+- `PUBLIC_PLAUSIBLE_DOMAIN` / `PUBLIC_PLAUSIBLE_SRC` — opt-in Plausible analytics
+  (see **Analytics** above); empty by default so nothing is emitted.
 
-To enable Plausible analytics in the container, pass `PUBLIC_PLAUSIBLE_DOMAIN` (and
-optionally `PUBLIC_PLAUSIBLE_SRC`) as build args — see **Analytics** above.
+These are wired through `docker-compose.yml`, so a `.env` file next to it (or exported
+shell vars) is picked up automatically by `just serve` / `docker compose up`.
 
 ## WASM emulator (v86)
 
