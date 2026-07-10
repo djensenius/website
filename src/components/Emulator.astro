@@ -414,9 +414,16 @@ const noteId = `terminal-note-${uid}`;
     const root = container && container.closest('.emulator');
     if (window.__v86ActiveScreen === undefined) window.__v86ActiveScreen = screenId;
     if (container) {
+      const focusScreen = () => {
+        try {
+          container.focus({ preventScroll: true });
+        } catch {
+          container.focus();
+        }
+      };
       container.addEventListener('pointerdown', () => {
         window.__v86ActiveScreen = screenId;
-        container.focus({ preventScroll: true });
+        focusScreen();
       });
       container.addEventListener('focusin', () => {
         window.__v86ActiveScreen = screenId;

@@ -65,6 +65,7 @@ const description =
       const empty = document.getElementById('empty') as HTMLElement;
 
       let files: FsNode[] = [];
+      let focusAfterHash: HTMLElement | null = null;
 
       function render(nodes: FsNode[]) {
         tree.replaceChildren();
@@ -94,7 +95,7 @@ const description =
         }
       }
 
-      async function open(path: string) {
+      async function open(path: string, focusTarget?: HTMLElement) {
         const node = files.find((f) => f.path === path);
         if (!node) return;
         empty.hidden = true;
@@ -116,13 +117,15 @@ const description =
           if (!article) throw new Error('no content found');
           loading.remove();
           viewer.append(article);
-          viewer.focus();
+          if (focusTarget) focusTarget.focus();
+          else viewer.focus();
         } catch (err) {
           loading.remove();
           const p = document.createElement('p');
           p.className = 'prompt status';
           p.textContent = `Could not load ${path}: ${(err as Error).message}`;
           viewer.append(p);
+          if (focusTarget) focusTarget.focus();
         }
       }
 
@@ -137,13 +140,23 @@ const description =
         if (entries.length === 0) return;
         const next = Math.max(0, Math.min(entries.length - 1, currentIndex() + delta));
         const target = entries[next];
+        const path = target.dataset.path ?? '';
+        if (!path) return;
+        focusAfterHash = target;
         target.focus();
-        location.hash = target.dataset.path ?? '';
+        if (location.hash.replace(/^#/, '') === path) {
+          focusAfterHash = null;
+          void open(path, target);
+        } else {
+          location.hash = path;
+        }
       }
 
       function fromHash() {
         const path = location.hash.replace(/^#/, '');
-        if (path) void open(path);
+        const focusTarget = focusAfterHash ?? undefined;
+        focusAfterHash = null;
+        if (path) void open(path, focusTarget);
         else {
           const defaultPath = '/info/bio';
           history.replaceState(null, '', `#${defaultPath}`);
@@ -167,7 +180,6 @@ const description =
           move(Infinity);
         }
       });
-
       window.addEventListener('hashchange', fromHash);
 
       (async () => {
