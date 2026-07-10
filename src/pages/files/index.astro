@@ -6,6 +6,7 @@
 // static fallback routes (issue #23) so it degrades gracefully and shares one
 // source of rendered HTML. Deep-links via the URL hash (e.g. #/projects/<id>).
 // Vanilla TS by design — the spike showed no framework is warranted here.
+import Analytics from '../../components/Analytics.astro';
 import BaseHead from '../../components/BaseHead.astro';
 import ModeToggle from '../../components/ModeToggle.astro';
 import '../../styles/file-view.css';
@@ -25,6 +26,7 @@ const description =
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <BaseHead title={title} description={description} path="/files/" />
     <link rel="alternate" type="application/rss+xml" title="David Jensenius RSS" href={rssHref} />
+    <Analytics />
   </head>
   <body data-base={base}>
     <div class="modebar">

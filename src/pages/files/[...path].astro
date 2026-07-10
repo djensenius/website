@@ -6,6 +6,7 @@
 // engines can index. Paths mirror the virtual filesystem: /files/info/bio,
 // /files/projects/<id>.
 import { getEntry, render } from 'astro:content';
+import Analytics from '../../components/Analytics.astro';
 import BaseHead from '../../components/BaseHead.astro';
 import ModeToggle from '../../components/ModeToggle.astro';
 import { buildManifest, fileNodes, type FsNode } from '../../lib/filesystem';
@@ -58,6 +59,7 @@ const fileHref = (path: string) =>
       image={pageImage}
       type="article"
     />
+    <Analytics />
   </head>
   <body>
     <div class="modebar">
