@@ -14,6 +14,12 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo_root"
 
+if ! command -v gh >/dev/null 2>&1; then
+  echo "error: the GitHub CLI (gh) is required to fetch the emulator image." >&2
+  echo "       Install it from https://cli.github.com/ and run 'gh auth login'." >&2
+  exit 1
+fi
+
 tag="${V86_IMAGE_TAG:-emulator-image}"
 # Default to the upstream repo so the fetch works from forks too (where the
 # `emulator-image` release doesn't exist); override with V86_IMAGE_REPO if needed.
