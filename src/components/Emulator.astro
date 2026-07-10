@@ -71,7 +71,35 @@ const screenId = `screen_container-${uid}`;
     setupKeyboard(emulator);
     const refit = setupScaleToFill(emulator);
 
-    // Once the shell is ready, drop the visitor into the content at /mnt.
+    // Once the shell is ready, set up a themed environment and drop the visitor
+    // into the content at /mnt. This runs every boot (the stock buildroot image
+    // is read-only), so all customization is applied here over the serial line
+    // rather than baked into the image.
+    const setup = [
+      // Identity + prompt.
+      'hostname djensenius',
+      "export PS1='dj:\\w\\$ '",
+      // Friendly helper commands built on the content in /mnt.
+      'bio() { cat /mnt/bio.txt; }',
+      'projects() { ls /mnt/projects; }',
+      "help() { echo 'Commands: ls, cat <file>, bio, projects, help.'; echo 'Everything lives in /mnt. Networking: run udhcpc.'; }",
+      // Replace the stock boot banner with our own welcome. Plain ASCII only:
+      // the VGA text screen renders a CP437 font, so box-drawing/Unicode would
+      // garble.
+      'clear',
+      "echo '  ==================================='",
+      "echo '   David Jensenius'",
+      "echo '   composer + media artist'",
+      "echo '  ==================================='",
+      'echo',
+      "echo '  A tiny Linux running in your browser. Your work lives in /mnt.'",
+      "echo '  Try: ls, bio, projects, help'",
+      'echo',
+      // Drop into the content.
+      'cd /mnt',
+      'ls',
+    ];
+
     let greeted = false;
     let buffer = '';
     emulator.add_listener('serial0-output-byte', (byte) => {
@@ -80,7 +108,7 @@ const screenId = `screen_container-${uid}`;
       if (/[#%]\s$/.test(buffer)) {
         greeted = true;
         setStatus('Linux ready — your files are in /mnt.');
-        emulator.serial0_send('cd /mnt && ls\n');
+        emulator.serial0_send(setup.join('\n') + '\n');
         // Content just changed the display; re-fit a moment after it renders.
         setTimeout(() => refit && refit(), 300);
       }
@@ -127,11 +155,9 @@ const screenId = `screen_container-${uid}`;
       const availW = container.clientWidth - padX;
       const availH = container.clientHeight - padY;
       // Fit to whichever dimension is the tighter constraint so the whole
-      // terminal stays visible while filling as much space as possible.
-      const scale = Math.max(
-        0.5,
-        Math.min(availW / natural.w, availH / natural.h, 6),
-      );
+      // terminal stays visible while filling as much space as possible. No lower
+      // clamp: `.screen` clips overflow, so the display must always fit.
+      const scale = Math.min(availW / natural.w, availH / natural.h, 6);
       emulator.screen_set_scale(scale, scale);
       return true;
     };
@@ -168,7 +194,21 @@ const screenId = `screen_container-${uid}`;
     const swallow = new Set(['Shift', 'Alt', 'AltGraph', 'CapsLock']);
     const isPrintable = (e) => e.key && e.key.length === 1 && !e.ctrlKey;
 
+    // Only one emulator on the page is "active" (receives keyboard input) at a
+    // time, so multiple instances don't all intercept and duplicate keystrokes.
+    // The first instance to boot is active by default; clicking another one's
+    // screen makes it active. The active screenId lives on a shared window key.
+    const container = document.getElementById(screenId);
+    if (window.__v86ActiveScreen === undefined) window.__v86ActiveScreen = screenId;
+    if (container) {
+      container.addEventListener('pointerdown', () => {
+        window.__v86ActiveScreen = screenId;
+      });
+    }
+    const isActive = () => window.__v86ActiveScreen === screenId;
+
     const handler = (e) => {
+      if (!isActive()) return;
       if (editable(e.target)) return;
       // Leave Cmd/Win shortcuts (copy, paste, …) entirely alone so the browser,
       // OS, and any other page listeners still receive them.
