@@ -3,7 +3,17 @@ name: Deploy preview to GitHub Pages
 on:
   push:
     branches: [main]
+    # Pushes that only touch the emulator image sources are handled by the
+    # build-v86-image workflow, which rebuilds the image and then calls this
+    # workflow — so skip the redundant pre-rebuild deploy for those.
+    paths-ignore:
+      - 'scripts/v86-image/**'
+      - 'scripts/build-v86-image.sh'
+      - '.github/workflows/build-v86-image.yml'
   workflow_dispatch:
+  # Reusable: the build-v86-image workflow calls this after publishing a fresh
+  # emulator image so the new image ships immediately.
+  workflow_call:
 
 permissions:
   contents: read
@@ -33,6 +43,14 @@ jobs:
 
       - name: Install dependencies
         run: just install
+
+      # The v86 emulator image (bzimage + initrd) is not committed to git; pull
+      # it from the rolling `emulator-image` release so the built site includes a
+      # bootable emulator. See scripts/fetch-v86-image.sh.
+      - name: Fetch emulator image
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: just v86-fetch
 
       - name: Build
         # site + base come from the Pages deployment so links resolve under the

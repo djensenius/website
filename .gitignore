@@ -3,6 +3,11 @@ dist/
 .astro/
 build/
 
+# Prebuilt v86 emulator image — not versioned; fetched from the `emulator-image`
+# release via `just v86-fetch` (built by the build-v86-image workflow).
+public/emulator/v86/buildroot-bzimage.bin
+public/emulator/v86/buildroot-initrd.bin
+
 # dependencies
 node_modules/
 
