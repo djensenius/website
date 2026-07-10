@@ -1,8 +1,11 @@
 # Third-party notices — v86 emulator assets
 
-The files in this directory are prebuilt third-party binaries, redistributed here
-so the in-browser emulator works offline. They are not products of this repository.
-Each is listed below with its upstream project, license, and source pointer.
+The files in this directory are third-party assets bundled so the in-browser
+emulator works offline. Some are prebuilt binaries redistributed verbatim
+(v86, SeaBIOS, VGABIOS); others (`buildroot-bzimage.bin`, `buildroot-initrd.bin`)
+are built from third-party sources by this repository — the code they contain is
+not authored here. Each is listed below with its upstream project, license, and
+source pointer.
 
 | File | Component | License | Source |
 | --- | --- | --- | --- |
