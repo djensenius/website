@@ -16,10 +16,19 @@ on:
       - 'scripts/v86-image/**'
       - 'scripts/build-v86-image.sh'
       - '.github/workflows/build-v86-image.yml'
+  # Validate image-source changes on PRs too: build + smoke-test the image, but
+  # skip the publish/deploy steps (see the `if:` guards below). This catches a
+  # broken emulator image before it reaches main.
+  pull_request:
+    branches: [main]
+    paths:
+      - 'scripts/v86-image/**'
+      - 'scripts/build-v86-image.sh'
+      - '.github/workflows/build-v86-image.yml'
   workflow_dispatch:
 
 concurrency:
-  group: v86-image
+  group: v86-image-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -61,6 +70,10 @@ jobs:
         run: node scripts/v86-smoke.mjs
 
       - name: Publish to emulator-image release
+        # Only publish for real (push/manual) runs — never on PRs, where
+        # GITHUB_TOKEN is read-only (especially from forks) and unmerged code
+        # must not update the shared release.
+        if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -77,6 +90,9 @@ jobs:
   deploy:
     name: Deploy site with the new image
     needs: build
+    # Skip on PRs: never deploy unmerged code, and Pages permissions are
+    # restricted in PR contexts.
+    if: github.event_name != 'pull_request'
     permissions:
       contents: read
       pages: write
