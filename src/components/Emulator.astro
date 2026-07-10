@@ -87,8 +87,6 @@ const screenId = `screen_container-${uid}`;
     });
   }
 
-  // Scale the emulated display to fill its container's width. v86 renders the
-  // buildroot console at a fixed 80×25 text grid; screen_set_scale applies a CSS
   // Scale the emulated display to fit its container. v86 renders the buildroot
   // console at a fixed 80×25 text grid; screen_set_scale applies a CSS transform
   // so the terminal fills the available space (both width and height) instead of
