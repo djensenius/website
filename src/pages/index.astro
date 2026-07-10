@@ -22,6 +22,7 @@ const rssHref = `${import.meta.env.BASE_URL}rss.xml`.replace(/\/{2,}/g, '/');
     <Analytics />
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
     <div class="shell">
       <header class="masthead">
         <div class="modebar">
@@ -34,7 +35,7 @@ const rssHref = `${import.meta.env.BASE_URL}rss.xml`.replace(/\/{2,}/g, '/');
           Composer and media artist. Switch to <strong>Files</strong> above for plain pages.
         </p>
       </header>
-      <main class="stage">
+      <main id="main" class="stage" tabindex="-1">
         <Emulator />
       </main>
     </div>
@@ -67,6 +68,36 @@ const rssHref = `${import.meta.env.BASE_URL}rss.xml`.replace(/\/{2,}/g, '/');
         background: var(--shell-bg);
         color: var(--shell-fg);
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+
+      .skip-link {
+        position: fixed;
+        inset-block-start: 0.75rem;
+        inset-inline-start: 0.75rem;
+        z-index: 10;
+        transform: translateY(-200%);
+        background: var(--shell-bg);
+        color: var(--shell-fg);
+        border: 2px solid currentColor;
+        border-radius: 0.25rem;
+        padding: 0.5rem 0.75rem;
+      }
+
+      .skip-link:focus-visible {
+        transform: translateY(0);
+        outline: 3px solid var(--shell-link);
+        outline-offset: 2px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
       }
 
       /* Full-viewport column: a compact header with my info, then the emulator

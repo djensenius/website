@@ -25,6 +25,7 @@ const uid = crypto.randomUUID().slice(0, 8);
 const statusId = `status-${uid}`;
 const screenId = `screen_container-${uid}`;
 const scrollbackId = `scrollback-${uid}`;
+const noteId = `terminal-note-${uid}`;
 ---
 
 <div class="emulator">
@@ -32,7 +33,14 @@ const scrollbackId = `scrollback-${uid}`;
   <!-- v86's ScreenAdapter toggles the inline `display` of these two children to
        switch between text and graphical (VGA) modes, so the initial state is set
        inline here rather than in CSS. -->
-  <div id={screenId} class="screen">
+  <div
+    id={screenId}
+    class="screen"
+    role="region"
+    aria-label="Linux terminal emulator"
+    aria-describedby={`${statusId} ${noteId}`}
+    tabindex="0"
+  >
     <div class="screen-text" style="display: block"></div>
     <canvas class="screen-canvas" style="display: none"></canvas>
   </div>
@@ -41,7 +49,9 @@ const scrollbackId = `scrollback-${uid}`;
     <button type="button" class="scrollback-toggle" aria-controls={scrollbackId} aria-expanded="false">
       Show scrollback
     </button>
-    <span class="terminal-note">Selection works in DOM text mode; VGA/canvas text can be copied with the button.</span>
+    <span id={noteId} class="terminal-note">
+      Selection works in DOM text mode; VGA/canvas text can be copied with the button.
+    </span>
   </div>
   <div id={scrollbackId} class="scrollback" hidden>
     <pre class="scrollback-buffer" tabindex="0" aria-label="Emulator scrollback"></pre>
@@ -404,11 +414,28 @@ const scrollbackId = `scrollback-${uid}`;
     const root = container && container.closest('.emulator');
     if (window.__v86ActiveScreen === undefined) window.__v86ActiveScreen = screenId;
     if (container) {
-      container.addEventListener('pointerdown', () => {
+      const focusScreen = () => {
+        try {
+          container.focus({ preventScroll: true });
+        } catch {
+          container.focus();
+        }
+      };
+      container.addEventListener(
+        'pointerdown',
+        () => {
+          window.__v86ActiveScreen = screenId;
+          focusScreen();
+        },
+        true,
+      );
+      container.addEventListener('focusin', () => {
         window.__v86ActiveScreen = screenId;
       });
     }
     const isActive = () => window.__v86ActiveScreen === screenId;
+    const screenHasFocus = () =>
+      container && document.activeElement && container.contains(document.activeElement);
     const selectedInside = () => {
       const selection = window.getSelection();
       if (!selection || selection.isCollapsed || !selection.toString()) return false;
@@ -422,6 +449,7 @@ const scrollbackId = `scrollback-${uid}`;
         e.stopImmediatePropagation();
         return;
       }
+      if (!screenHasFocus()) return;
       // Leave Cmd/Win shortcuts (copy, paste, …) alone so the browser, OS, and
       // any other page listeners still receive them. The exception is selected
       // emulator text above: Cmd/Ctrl+C is stopped there so the guest does not

@@ -6,16 +6,20 @@
  */
 .emulator {
   --e-fg: #d7d7d7;
+  --e-ui-fg: #d7d7d7;
   --e-muted: #8a8a8a;
   --e-border: #222222;
   --e-link: #7aa2f7;
+  --e-focus-ring: #facc15;
 }
 
 @media (prefers-color-scheme: light) {
   .emulator {
+    --e-ui-fg: #1a1a1a;
     --e-muted: #6a6a6a;
     --e-border: #c9c9c4;
     --e-link: #1d4ed8;
+    --e-focus-ring: #7c3aed;
   }
 }
 
@@ -50,6 +54,11 @@
    * container to the scaled grid. Clip any sub-pixel rounding overflow rather
    * than showing a scrollbar. */
   overflow: hidden;
+}
+
+.emulator .screen:focus-visible {
+  outline: 3px solid var(--e-focus-ring);
+  outline-offset: 3px;
 }
 
 .emulator .screen.is-fitted {
@@ -98,15 +107,21 @@
   border: 1px solid var(--e-border);
   border-radius: 0.25rem;
   background: transparent;
-  color: var(--e-fg);
+  color: var(--e-ui-fg);
   font: inherit;
   padding: 0.25rem 0.5rem;
 }
 
-.emulator .terminal-actions button:hover,
+.emulator .terminal-actions button:hover {
+  border-color: var(--e-link);
+  color: var(--e-link);
+}
+
 .emulator .terminal-actions button:focus-visible {
   border-color: var(--e-link);
   color: var(--e-link);
+  outline: 3px solid var(--e-focus-ring);
+  outline-offset: 2px;
 }
 
 .emulator .terminal-note {
@@ -139,6 +154,11 @@
   -webkit-user-select: text;
 }
 
+.emulator .scrollback-buffer:focus-visible {
+  outline: 3px solid var(--e-focus-ring);
+  outline-offset: 3px;
+}
+
 .emulator .fallback {
   flex: 0 0 auto;
   color: var(--e-muted);
@@ -148,4 +168,20 @@
 
 .emulator .fallback a {
   color: var(--e-link);
+}
+
+.emulator .fallback a:focus-visible {
+  outline: 3px solid var(--e-focus-ring);
+  outline-offset: 0.2em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .emulator *,
+  .emulator *::before,
+  .emulator *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
