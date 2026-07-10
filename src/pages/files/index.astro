@@ -1,11 +1,11 @@
 ---
 // File-navigation island (issue #22).
-// The interactive, artistic file browser that graduates the Phase 1 spike
-// (src/pages/spike/files.astro). It fetches the build-time manifest (issue #21),
-// renders an ls-style directory tree, and loads file content on demand from the
-// static fallback routes (issue #23) so it degrades gracefully and shares one
-// source of rendered HTML. Deep-links via the URL hash (e.g. #/projects/<id>).
-// Vanilla TS by design — the spike showed no framework is warranted here.
+// The interactive, artistic file browser. It fetches the build-time manifest
+// (issue #21), renders an ls-style directory tree, and loads file content on
+// demand from the static fallback routes (issue #23) so it degrades gracefully
+// and shares one source of rendered HTML. Deep-links via the URL hash (e.g.
+// #/projects/<id>). Vanilla TS by design — the spike showed no framework is
+// warranted here.
 import Analytics from '../../components/Analytics.astro';
 import BaseHead from '../../components/BaseHead.astro';
 import ModeToggle from '../../components/ModeToggle.astro';

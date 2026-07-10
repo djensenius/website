@@ -3,23 +3,66 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test } from 'vitest';
 
-test('invalid analytics script source is ignored when analytics is disabled', () => {
-  const env: NodeJS.ProcessEnv = {
-    ...process.env,
+test.sequential('invalid analytics script source is ignored when analytics is disabled', () => {
+  buildSite({
+    PUBLIC_PLAUSIBLE_DOMAIN: undefined,
     PUBLIC_PLAUSIBLE_SRC: 'javascript:alert(1)',
-  };
-  delete env.PUBLIC_PLAUSIBLE_DOMAIN;
-
-  execFileSync('npm', ['run', 'build'], {
-    cwd: process.cwd(),
-    env,
-    stdio: 'pipe',
   });
 
   const html = readHtmlFiles('dist').join('\n');
   expect(html).not.toContain('data-domain');
   expect(html).not.toContain('plausible.io/js/script.js');
 }, 120_000);
+
+test.sequential('default analytics script is emitted when analytics is enabled', () => {
+  buildSite({
+    PUBLIC_PLAUSIBLE_DOMAIN: 'example.com',
+    PUBLIC_PLAUSIBLE_SRC: undefined,
+  });
+
+  const html = readHtmlFiles('dist').join('\n');
+  expect(html).toContain('data-domain="example.com"');
+  expect(html).toContain('src="https://plausible.io/js/script.js"');
+}, 120_000);
+
+test.sequential('invalid analytics script source fails the build when analytics is enabled', () => {
+  expect(() =>
+    buildSite({
+      PUBLIC_PLAUSIBLE_DOMAIN: 'example.com',
+      PUBLIC_PLAUSIBLE_SRC: 'javascript:alert(1)',
+    }),
+  ).toThrow(/Invalid PUBLIC_PLAUSIBLE_SRC/);
+}, 120_000);
+
+test.sequential('empty analytics script source falls back to the default when analytics is enabled', () => {
+  buildSite({
+    PUBLIC_PLAUSIBLE_DOMAIN: 'example.com',
+    PUBLIC_PLAUSIBLE_SRC: '   ',
+  });
+
+  const html = readHtmlFiles('dist').join('\n');
+  expect(html).toContain('data-domain="example.com"');
+  expect(html).toContain('src="https://plausible.io/js/script.js"');
+}, 120_000);
+
+function buildSite(overrides: {
+  PUBLIC_PLAUSIBLE_DOMAIN: string | undefined;
+  PUBLIC_PLAUSIBLE_SRC: string | undefined;
+}) {
+  const env: NodeJS.ProcessEnv = {
+    ...process.env,
+  };
+  for (const [key, value] of Object.entries(overrides)) {
+    if (value === undefined) delete env[key];
+    else env[key] = value;
+  }
+
+  execFileSync('npm', ['run', 'build'], {
+    cwd: process.cwd(),
+    env,
+    stdio: 'pipe',
+  });
+}
 
 function readHtmlFiles(dir: string): string[] {
   return readdirSync(dir).flatMap((entry) => {
