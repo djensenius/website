@@ -53,8 +53,7 @@ function buildSite(overrides: {
     ...process.env,
   };
   for (const [key, value] of Object.entries(overrides)) {
-    if (value === undefined) delete env[key];
-    else env[key] = value;
+    env[key] = value ?? '';
   }
 
   execFileSync('npm', ['run', 'build'], {
