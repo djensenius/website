@@ -60,12 +60,13 @@ const fileHref = (path: string) =>
     />
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
     <div class="modebar">
       <ModeToggle active="files" />
     </div>
     <nav aria-label="Files">
       <h2>~ / david</h2>
-      <ul>
+      <ul aria-label="File tree">
         {
           tree.map((n) =>
             n.kind === 'dir' ? (
@@ -76,6 +77,7 @@ const fileHref = (path: string) =>
                   class="entry"
                   href={fileHref(n.path)}
                   aria-current={n.path === node.path ? 'page' : undefined}
+                  aria-label={`Open ${n.name}`}
                 >
                   {n.name}
                 </a>
@@ -85,7 +87,7 @@ const fileHref = (path: string) =>
         }
       </ul>
     </nav>
-    <main>
+    <main id="main" tabindex="-1">
       <article>
         <h1>{node.title}</h1>
         {node.year && <p class="prompt">{node.year}</p>}
