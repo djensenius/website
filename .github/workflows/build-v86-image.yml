@@ -29,14 +29,18 @@ on:
 
 concurrency:
   group: v86-image-${{ github.ref }}
-  cancel-in-progress: false
+  # Cancel superseded PR builds (a new push makes the old ~45 min build moot),
+  # but never cancel a main build mid-publish.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
-    name: Build & publish emulator image
+    name: Build & smoke-test emulator image
     runs-on: ubuntu-latest
+    # Read-only: the build runs on untrusted PR code too, so it must never hold
+    # a write-capable token. Publishing happens in the separate `publish` job.
     permissions:
-      contents: write # create/update the emulator-image release + its assets
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -56,7 +60,7 @@ jobs:
       # toolchain/kernel/package tarballs. Keyed on the config so a config change
       # still reuses unrelated downloads via restore-keys.
       - name: Cache Buildroot downloads
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: build/v86-image/dl
           key: v86-dl-${{ hashFiles('scripts/v86-image/config.fragment', 'scripts/v86-image/base.config', 'scripts/build-v86-image.sh') }}
@@ -69,13 +73,38 @@ jobs:
       - name: Smoke test (boot + 9p mount)
         run: node scripts/v86-smoke.mjs
 
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: v86-image
+          path: |
+            public/emulator/v86/buildroot-bzimage.bin
+            public/emulator/v86/buildroot-initrd.bin
+          retention-days: 1
+          if-no-files-found: error
+
+  publish:
+    name: Publish to emulator-image release
+    needs: build
+    # Only publish for real (push/manual) runs — never on PRs, where the shared
+    # release must not be updated from unmerged code (and fork tokens are
+    # read-only). Isolating the write token to this job keeps the build job,
+    # which runs untrusted PR code, read-only.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create/update the emulator-image release + its assets
+    steps:
+      - name: Download image artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: v86-image
+          path: public/emulator/v86
+
       - name: Publish to emulator-image release
-        # Only publish for real (push/manual) runs — never on PRs, where
-        # GITHUB_TOKEN is read-only (especially from forks) and unmerged code
-        # must not update the shared release.
-        if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           gh release view emulator-image >/dev/null 2>&1 || \
             gh release create emulator-image \
@@ -89,7 +118,7 @@ jobs:
 
   deploy:
     name: Deploy site with the new image
-    needs: build
+    needs: publish
     # Skip on PRs: never deploy unmerged code, and Pages permissions are
     # restricted in PR contexts.
     if: github.event_name != 'pull_request'

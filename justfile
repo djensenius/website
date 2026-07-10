@@ -29,6 +29,14 @@ check:
     npm run check
     npm run astro:check
 
+# Check formatting without writing (CI); use `fmt` to auto-format.
+fmt-check:
+    npx vp fmt --check
+
+# Type-check only (Astro's checker).
+type-check:
+    npm run astro:check
+
 # Lint only.
 lint:
     npm run lint
