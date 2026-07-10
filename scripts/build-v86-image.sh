@@ -37,6 +37,15 @@ mkdir -p "$work_dir" "$dl_dir" "$out_dir"
 #     Linux ext4, so the mtime bug doesn't apply, and a host path lets
 #     actions/cache persist the compiled toolchain + packages across runs.
 if [[ -n "${V86_WORK_DIR:-}" ]]; then
+  # Bind-mount mode is CI-only. On macOS the glibc stamp.os dependency tracking
+  # breaks on OrbStack/virtiofs mtime semantics, so hard-error rather than let a
+  # local user hit the confusing "No rule to make target .../stamp.os" failure.
+  if [[ "$(uname -s)" == "Darwin" ]]; then
+    echo "error: V86_WORK_DIR (bind-mount mode) is unsupported on macOS — glibc's" >&2
+    echo "       stamp.os tracking breaks on OrbStack/virtiofs. Unset V86_WORK_DIR" >&2
+    echo "       to use the default named volume; bind-mount mode is CI-only." >&2
+    exit 1
+  fi
   mkdir -p "$V86_WORK_DIR"
   work_mount_src="$(cd "$V86_WORK_DIR" && pwd)"
   echo "==> Using bind-mounted work tree: ${work_mount_src}"
