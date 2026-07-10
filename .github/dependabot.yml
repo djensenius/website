@@ -1,0 +1,27 @@
+version: 2
+updates:
+  # Keep GitHub Actions pinned versions current (security + feature updates).
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: fix
+    labels:
+      - dependencies
+      - github-actions
+
+  # Node/npm dependencies for the Astro + Vite+ site.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: fix
+    labels:
+      - dependencies
+      - javascript
+    groups:
+      # Batch low-risk dev/tooling bumps into a single PR to cut review noise.
+      dev-dependencies:
+        dependency-type: development
