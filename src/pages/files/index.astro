@@ -21,10 +21,10 @@ import '../../styles/file-view.css';
     <meta name="description" content="Browse the work of David Jensenius." />
   </head>
   <body data-base={base}>
+    <div class="modebar">
+      <ModeToggle active="files" />
+    </div>
     <nav aria-label="Files">
-      <div class="modebar">
-        <ModeToggle active="files" />
-      </div>
       <h2>~ / david</h2>
       <ul id="tree">
         <li class="prompt">Loading…</li>
