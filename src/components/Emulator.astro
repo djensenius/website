@@ -174,6 +174,7 @@ const scrollbackId = `scrollback-${uid}`;
       const style = getComputedStyle(container);
       const padX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
       const padY = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+      const borderY = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
       const availW = container.clientWidth - padX;
       const availH = container.clientHeight - padY;
       // Fit to whichever dimension is tighter so the whole terminal stays
@@ -182,7 +183,7 @@ const scrollbackId = `scrollback-${uid}`;
       // letterbox intentional rather than looking like missing content.
       const scale = Math.min(availW / natural.w, availH / natural.h, 4);
       emulator.screen_set_scale(scale, scale);
-      container.style.blockSize = `${Math.ceil(natural.h * scale + padY)}px`;
+      container.style.blockSize = `${Math.ceil(natural.h * scale + padY + borderY)}px`;
       container.classList.add('is-fitted');
       return true;
     };
@@ -307,10 +308,13 @@ const scrollbackId = `scrollback-${uid}`;
 
     const renderScrollback = () => {
       if (!scrollbackBuffer || (scrollbackPanel && scrollbackPanel.hidden)) return;
+      const previousTop = scrollbackBuffer.scrollTop;
+      const wasAtBottom =
+        scrollbackBuffer.scrollHeight - scrollbackBuffer.scrollTop - scrollbackBuffer.clientHeight < 8;
       const rows = readRows();
       const content = scrollback.concat(rows).join('\n').trimEnd();
       scrollbackBuffer.textContent = content || 'Scrollback will appear after the console starts producing output.';
-      scrollbackBuffer.scrollTop = scrollbackBuffer.scrollHeight;
+      scrollbackBuffer.scrollTop = wasAtBottom ? scrollbackBuffer.scrollHeight : previousTop;
     };
 
     const appendLines = (lines) => {
@@ -425,8 +429,10 @@ const scrollbackId = `scrollback-${uid}`;
         e.stopImmediatePropagation();
         return;
       }
-      // Leave Cmd/Win shortcuts (copy, paste, …) entirely alone so the browser,
-      // OS, and any other page listeners still receive them.
+      // Leave Cmd/Win shortcuts (copy, paste, …) alone so the browser, OS, and
+      // any other page listeners still receive them. The exception is selected
+      // emulator text above: Cmd/Ctrl+C is stopped there so the guest does not
+      // also receive the copy shortcut as input.
       if (e.metaKey) return;
       if (swallow.has(e.key)) {
         e.stopImmediatePropagation();
