@@ -1,0 +1,31 @@
+# /etc/inittab — BusyBox init for the v86 in-browser Linux.
+#
+# Format: <id>:<runlevels>:<action>:<process>
+
+# Startup the system
+# devtmpfs MUST be mounted by hand here: CONFIG_DEVTMPFS_MOUNT is a no-op when the
+# kernel boots from an initramfs/initrd, so without this /dev has only the few
+# static nodes baked into the image (no ttyS0/tty1/…) and every getty line below
+# respawn-fails forever, flooding the console — which is what you see in the
+# browser as the screen "dying" after early boot.
+::sysinit:/bin/mount -t devtmpfs devtmpfs /dev
+::sysinit:/bin/mount -t proc proc /proc
+::sysinit:/bin/mount -o remount,rw /
+::sysinit:/bin/mkdir -p /dev/pts /dev/shm
+::sysinit:/bin/mount -a
+::sysinit:/bin/mkdir -p /run/lock/subsys
+::sysinit:/bin/hostname -F /etc/hostname
+# now run any rc scripts
+::sysinit:/etc/init.d/rcS
+
+# Auto-login root. The browser renders the VGA text console, which shows
+# /dev/console (tty0 — the last `console=` on the kernel cmdline). Run the
+# interactive shell there so it's visible; ttyS0 carries an identical shell for
+# the headless smoke test. Keep this list minimal — extra gettys on invisible
+# VTs (tty1…) or non-existent devices only cause confusion or respawn spam.
+console::respawn:/bin/login -f root
+ttyS0::respawn:/bin/login -f root
+
+# Stuff to do before rebooting
+::shutdown:/etc/init.d/rcK
+::shutdown:/bin/umount -a -r

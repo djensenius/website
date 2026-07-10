@@ -46,6 +46,13 @@ test:
 image:
     ./scripts/build-image.sh
 
+# Rebuild the v86 in-browser Linux image (Buildroot glibc + busybox/vim/bat,
+# djensenius-themed login). Writes public/emulator/v86/buildroot-bzimage.bin
+# and buildroot-initrd.bin.
+# Long, Dockerized build; the Buildroot tree is cached under build/v86-image.
+v86-image:
+    ./scripts/build-v86-image.sh
+
 # Regenerate the v86 WASM emulator's 9p filesystem from Markdown (issue #37).
 # Writes public/emulator/v86/fs.json and public/emulator/v86/fs/. No Docker needed.
 v86-fs:

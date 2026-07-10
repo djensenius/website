@@ -1,0 +1,54 @@
+# Overrides applied on top of base.config (merged via merge_config.sh, then
+# `make olddefconfig`). base.config is the upstream browser-buildroot "standard"
+# config; this fragment tailors it for djensenius.com's embedded v86 emulator:
+# a single self-contained bzImage with just the requested modern CLI tools.
+
+# --- Output: a standalone gzip-compressed initramfs, loaded by v86 as a ------
+# separate `initrd` (NOT embedded in the bzImage). v86's real-mode bzImage
+# loader is unreliable with a large *embedded* initramfs — it hangs before init
+# — so we ship the kernel and the rootfs.cpio.gz separately and let v86 place
+# the initrd at its fixed high-memory load address.
+# BR2_TARGET_ROOTFS_INITRAMFS is not set
+# BR2_TARGET_ROOTFS_ISO9660 is not set
+BR2_TARGET_ROOTFS_CPIO=y
+BR2_TARGET_ROOTFS_CPIO_GZIP=y
+
+# --- Identity ---------------------------------------------------------------
+BR2_TARGET_GENERIC_HOSTNAME="djensenius"
+BR2_TARGET_GENERIC_ISSUE="WELcome to the SYSTEm]]]];find;info(david jensenius)"
+# Only root; drop the upstream 'user' account so serial auto-login is root.
+BR2_ROOTFS_USERS_TABLES=""
+
+# --- Kernel: pin to the exact version browser-buildroot boots in v86 ---------
+# Buildroot defaults BR2_LINUX_KERNEL_LATEST_VERSION=y, which pulled 6.6.68 — a
+# kernel that boots all drivers but then hangs in async_synchronize_full(), just
+# after the last initcall and before init runs, under v86. 6.6.37 (the series the
+# upstream config targets) boots to a shell. Pin it so the boot stays reliable.
+# BR2_LINUX_KERNEL_LATEST_VERSION is not set
+BR2_LINUX_KERNEL_CUSTOM_VERSION=y
+BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.6.37"
+
+# --- Requested tools --------------------------------------------------------
+BR2_PACKAGE_VIM=y
+BR2_PACKAGE_BAT=y
+
+# --- Trim upstream extras (smaller image + faster build) --------------------
+# olddefconfig re-enables anything vim/bat actually require.
+# BR2_PACKAGE_BASH is not set
+# BR2_PACKAGE_TMUX is not set
+# BR2_PACKAGE_HTOP is not set
+# BR2_PACKAGE_MC is not set
+# BR2_PACKAGE_NANO is not set
+# BR2_PACKAGE_UEMACS is not set
+# BR2_PACKAGE_ED is not set
+# BR2_PACKAGE_LYNX is not set
+# BR2_PACKAGE_GNUPG2 is not set
+# BR2_PACKAGE_SUDO is not set
+# BR2_PACKAGE_FILE is not set
+# BR2_PACKAGE_NEOFETCH is not set
+# BR2_PACKAGE_SCREENFETCH is not set
+# BR2_PACKAGE_SL is not set
+# BR2_PACKAGE_ASCII_INVADERS is not set
+# BR2_PACKAGE_DEJAVU is not set
+# BR2_PACKAGE_LUA is not set
+# BR2_PACKAGE_TMUX is not set
