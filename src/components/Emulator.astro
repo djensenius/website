@@ -36,7 +36,7 @@ const scrollbackId = `scrollback-${uid}`;
     <div class="screen-text" style="display: block"></div>
     <canvas class="screen-canvas" style="display: none"></canvas>
   </div>
-  <div class="terminal-actions" aria-label="Terminal tools">
+  <div class="terminal-actions" role="group" aria-label="Terminal tools">
     <button type="button" class="copy-visible">Copy visible text</button>
     <button type="button" class="scrollback-toggle" aria-controls={scrollbackId} aria-expanded="false">
       Show scrollback
@@ -246,13 +246,45 @@ const scrollbackId = `scrollback-${uid}`;
     window.addEventListener('keydown', copySelectionShortcut, true);
     window.addEventListener('keyup', copySelectionShortcut, true);
 
-    const setCopied = () => {
+    const setCopyFeedback = (message) => {
       if (!copyButton) return;
       const original = copyButton.textContent;
-      copyButton.textContent = 'Copied';
+      copyButton.textContent = message;
       setTimeout(() => {
         copyButton.textContent = original;
       }, 1200);
+    };
+
+    const copyWithTextarea = (text) => {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.insetBlockStart = '0';
+      textarea.style.insetInlineStart = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      let copied = false;
+      try {
+        copied = document.execCommand('copy');
+      } catch {
+        copied = false;
+      } finally {
+        textarea.remove();
+      }
+      return copied;
+    };
+
+    const copyText = async (text) => {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch {
+        // Fall through to the legacy path for insecure contexts or denied permissions.
+      }
+      return copyWithTextarea(text);
     };
 
     if (copyButton) {
@@ -260,8 +292,12 @@ const scrollbackId = `scrollback-${uid}`;
         const selected = selectionInside() ? window.getSelection().toString() : '';
         const text = selected || visibleText();
         if (!text) return;
-        await navigator.clipboard.writeText(text);
-        setCopied();
+        if (await copyText(text)) {
+          setCopyFeedback('Copied');
+        } else {
+          setCopyFeedback('Copy failed');
+          setStatus('Copy failed. Select text and use your browser copy shortcut.');
+        }
       });
     }
 
@@ -270,7 +306,7 @@ const scrollbackId = `scrollback-${uid}`;
     let captureQueued = false;
 
     const renderScrollback = () => {
-      if (!scrollbackBuffer) return;
+      if (!scrollbackBuffer || (scrollbackPanel && scrollbackPanel.hidden)) return;
       const rows = readRows();
       const content = scrollback.concat(rows).join('\n').trimEnd();
       scrollbackBuffer.textContent = content || 'Scrollback will appear after the console starts producing output.';
