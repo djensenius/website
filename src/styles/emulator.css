@@ -1,0 +1,79 @@
+/*
+ * Styling for the embeddable v86 emulator component (issues #37/#34).
+ * Self-contained and scoped to the `.emulator` wrapper so it can be dropped into
+ * any page (the landing shell, the standalone /emulator route) without depending
+ * on the file-nav layout. Colours follow the OS light/dark setting with no toggle.
+ */
+.emulator {
+  --e-fg: #d7d7d7;
+  --e-muted: #8a8a8a;
+  --e-border: #222222;
+  --e-link: #7aa2f7;
+}
+
+@media (prefers-color-scheme: light) {
+  .emulator {
+    --e-muted: #6a6a6a;
+    --e-border: #c9c9c4;
+    --e-link: #1d4ed8;
+  }
+}
+
+.emulator {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.emulator .status {
+  flex: 0 0 auto;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--e-muted);
+  margin: 0 0 0.5rem;
+}
+
+.emulator .screen {
+  flex: 1 1 auto;
+  min-height: 0;
+  background: #000;
+  border: 1px solid var(--e-border);
+  padding: 0.5rem;
+  /* The boot script scales the display to fit this container (width and height),
+   * so the terminal fills the available space. Clip any sub-pixel rounding
+   * overflow rather than showing a scrollbar. */
+  overflow: hidden;
+}
+
+/* Text (pre-boot / serial) screen mode. v86 toggles the inline `display` of the
+ * two children to switch between text and graphical (VGA) modes, so only the
+ * font styling lives here. `transform-origin` anchors the scale-to-fill
+ * transform (applied by v86's screen_set_scale) to the top-left corner. */
+.emulator .screen .screen-text,
+.emulator .screen .screen-canvas {
+  transform-origin: top left;
+}
+
+.emulator .screen .screen-text {
+  white-space: pre;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14px;
+  /* Use `normal`, not a fixed line-height: a value equal to the font-size clips
+   * glyph descenders (g, y, p, …) below the baseline. Matches upstream v86. */
+  line-height: normal;
+  color: var(--e-fg);
+}
+
+.emulator .fallback {
+  flex: 0 0 auto;
+  color: var(--e-muted);
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+}
+
+.emulator .fallback a {
+  color: var(--e-link);
+}

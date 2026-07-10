@@ -1,0 +1,244 @@
+---
+// Embeddable v86 WASM emulator (issues #37/#34). Boots a tiny buildroot Linux in
+// the browser and mounts the Markdown-derived 9p filesystem at /mnt, dropping the
+// visitor straight into the site content. Used by the landing shell
+// (src/pages/index.astro) and the standalone /emulator route.
+const base = import.meta.env.BASE_URL;
+const asset = (p: string) => `${base}emulator/v86/${p}`.replace(/\/{2,}/g, '/');
+const filesHref = `${base}files/`.replace(/\/{2,}/g, '/');
+const config = {
+  wasmPath: asset('v86.wasm'),
+  libPath: asset('libv86.mjs'),
+  bios: asset('bios/seabios.bin'),
+  vgaBios: asset('bios/vgabios.bin'),
+  bzimage: asset('buildroot-bzimage.bin'),
+  basefs: asset('fs.json'),
+  baseurl: asset('fs/'),
+};
+import '../styles/emulator.css';
+
+// Per-instance element IDs so the inline script always binds to its own instance
+// (v86 needs a real element/ID). Keyboard and resize handling are routed to a
+// single "active" instance (see setupKeyboard) so the component still behaves if
+// more than one emulator is ever placed on a page.
+const uid = crypto.randomUUID().slice(0, 8);
+const statusId = `status-${uid}`;
+const screenId = `screen_container-${uid}`;
+---
+
+<div class="emulator">
+  <p id={statusId} class="status" role="status" aria-live="polite">Booting Linux…</p>
+  <!-- v86's ScreenAdapter toggles the inline `display` of these two children to
+       switch between text and graphical (VGA) modes, so the initial state is set
+       inline here rather than in CSS. -->
+  <div id={screenId} class="screen">
+    <div class="screen-text" style="display: block"></div>
+    <canvas class="screen-canvas" style="display: none"></canvas>
+  </div>
+  <p class="fallback">
+    Prefer plain HTML, or the emulator won't load?
+    <a href={filesHref}>Browse the same content as plain pages</a>.
+  </p>
+</div>
+
+<script is:inline define:vars={{ config, statusId, screenId }}>
+  const statusEl = document.getElementById(statusId);
+  const setStatus = (text) => {
+    if (statusEl) statusEl.textContent = text;
+  };
+
+  async function boot() {
+    let V86;
+    try {
+      ({ V86 } = await import(config.libPath));
+    } catch (err) {
+      setStatus('Failed to load the emulator — use the link below.');
+      console.error(err);
+      return;
+    }
+
+    const emulator = new V86({
+      wasm_path: config.wasmPath,
+      memory_size: 128 * 1024 * 1024,
+      vga_memory_size: 4 * 1024 * 1024,
+      screen_container: document.getElementById(screenId),
+      bios: { url: config.bios },
+      vga_bios: { url: config.vgaBios },
+      bzimage: { url: config.bzimage, async: false },
+      filesystem: { basefs: config.basefs, baseurl: config.baseurl },
+      cmdline: 'tsc=reliable mitigations=off random.trust_cpu=on',
+      autostart: true,
+    });
+
+    setupKeyboard(emulator);
+    const refit = setupScaleToFill(emulator);
+
+    // Once the shell is ready, set up a themed environment and drop the visitor
+    // into the content at /mnt. This runs every boot (the stock buildroot image
+    // is read-only), so all customization is applied here over the serial line
+    // rather than baked into the image.
+    const setup = [
+      // Identity + prompt.
+      'hostname djensenius',
+      "export PS1='dj:\\w\\$ '",
+      // Friendly helper commands built on the content in /mnt.
+      'bio() { cat /mnt/bio.txt; }',
+      'projects() { ls /mnt/projects; }',
+      "help() { echo 'Commands: ls, cat <file>, bio, projects, help.'; echo 'Everything lives in /mnt. Networking: run udhcpc.'; }",
+      // Replace the stock boot banner with our own welcome. Plain ASCII only:
+      // the VGA text screen renders a CP437 font, so box-drawing/Unicode would
+      // garble.
+      'clear',
+      "echo '  ==================================='",
+      "echo '   David Jensenius'",
+      "echo '   composer + media artist'",
+      "echo '  ==================================='",
+      'echo',
+      "echo '  A tiny Linux running in your browser. Your work lives in /mnt.'",
+      "echo '  Try: ls, bio, projects, help'",
+      'echo',
+      // Drop into the content.
+      'cd /mnt',
+      'ls',
+    ];
+
+    let greeted = false;
+    let buffer = '';
+    emulator.add_listener('serial0-output-byte', (byte) => {
+      if (greeted) return;
+      buffer = (buffer + String.fromCharCode(byte)).slice(-64);
+      if (/[#%]\s$/.test(buffer)) {
+        greeted = true;
+        setStatus('Linux ready — your files are in /mnt.');
+        emulator.serial0_send(setup.join('\n') + '\n');
+        // Content just changed the display; re-fit a moment after it renders.
+        setTimeout(() => refit && refit(), 300);
+      }
+    });
+  }
+
+  // Scale the emulated display to fit its container. v86 renders the buildroot
+  // console at a fixed 80×25 text grid; screen_set_scale applies a CSS transform
+  // so the terminal fills the available space (both width and height) instead of
+  // sitting tiny in the corner or overflowing.
+  function setupScaleToFill(emulator) {
+    const container = document.getElementById(screenId);
+    if (!container) return;
+
+    // The real, unscaled size of the display. The text rows are block-level, so
+    // their bounding box reports the parent width; the actual 80-column text
+    // overflows invisibly. Measure the width with a Range over the widest row.
+    // In graphical (VGA) mode the canvas has intrinsic pixel dimensions.
+    const naturalSize = (text, canvas) => {
+      if (text && text.style.display !== 'none') {
+        let w = 0;
+        for (const row of text.children) {
+          const range = document.createRange();
+          range.selectNodeContents(row);
+          w = Math.max(w, range.getBoundingClientRect().width);
+        }
+        return { w, h: text.getBoundingClientRect().height };
+      }
+      return canvas ? { w: canvas.width, h: canvas.height } : { w: 0, h: 0 };
+    };
+
+    const fit = () => {
+      if (!emulator.screen_adapter) return false;
+      const text = container.querySelector('.screen-text');
+      const canvas = container.querySelector('.screen-canvas');
+
+      // Reset to 1:1 so the measurement reflects the unscaled display.
+      emulator.screen_set_scale(1, 1);
+      const natural = naturalSize(text, canvas);
+      if (!natural.w || !natural.h) return false;
+      const style = getComputedStyle(container);
+      const padX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+      const padY = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+      const availW = container.clientWidth - padX;
+      const availH = container.clientHeight - padY;
+      // Fit to whichever dimension is the tighter constraint so the whole
+      // terminal stays visible while filling as much space as possible. No lower
+      // clamp: `.screen` clips overflow, so the display must always fit.
+      const scale = Math.min(availW / natural.w, availH / natural.h, 6);
+      emulator.screen_set_scale(scale, scale);
+      return true;
+    };
+
+    // Retry until the display has actually rendered (early on, the text grid is
+    // empty and has zero width), then re-fit on every resize / mode change.
+    let tries = 0;
+    const attempt = () => {
+      if (fit() || tries++ > 40) return;
+      setTimeout(() => requestAnimationFrame(attempt), 150);
+    };
+    const schedule = () => requestAnimationFrame(fit);
+    emulator.add_listener('screen-set-size', schedule);
+    window.addEventListener('resize', schedule);
+    attempt();
+    return fit;
+  }
+
+  // Respect the host keyboard layout. v86's built-in adapter maps keys purely by
+  // physical position (event.code) to a US PC layout, so non-US host keymaps (and
+  // Mac Option characters) come out wrong. We intercept printable keys in the
+  // capture phase and re-inject the character the host actually produced via
+  // keyboard_send_text, while letting control/navigation keys fall through to
+  // v86's native (position-based) handling, which is correct for those.
+  function setupKeyboard(emulator) {
+    const editable = (el) =>
+      el &&
+      (el.tagName === 'INPUT' ||
+        el.tagName === 'TEXTAREA' ||
+        el.tagName === 'SELECT' ||
+        el.isContentEditable);
+    // Modifiers we synthesize per-character (via keyboard_send_text) and must
+    // therefore hide from v86, so the guest's shift/alt state stays clean.
+    const swallow = new Set(['Shift', 'Alt', 'AltGraph', 'CapsLock']);
+    // A single-character key is printable input unless it's a real Ctrl
+    // shortcut. AltGr (reported as ctrlKey+altKey, or via the AltGraph modifier
+    // on Windows/Linux) still produces printable characters, so don't treat
+    // those as control combos — otherwise they'd fall through to v86's US
+    // position mapping and come out wrong.
+    const isPrintable = (e) => {
+      if (!e.key || e.key.length !== 1) return false;
+      const altGr = e.getModifierState('AltGraph') || (e.ctrlKey && e.altKey);
+      return altGr || !e.ctrlKey;
+    };
+
+    // Only one emulator on the page is "active" (receives keyboard input) at a
+    // time, so multiple instances don't all intercept and duplicate keystrokes.
+    // The first instance to boot is active by default; clicking another one's
+    // screen makes it active. The active screenId lives on a shared window key.
+    const container = document.getElementById(screenId);
+    if (window.__v86ActiveScreen === undefined) window.__v86ActiveScreen = screenId;
+    if (container) {
+      container.addEventListener('pointerdown', () => {
+        window.__v86ActiveScreen = screenId;
+      });
+    }
+    const isActive = () => window.__v86ActiveScreen === screenId;
+
+    const handler = (e) => {
+      if (!isActive()) return;
+      if (editable(e.target)) return;
+      // Leave Cmd/Win shortcuts (copy, paste, …) entirely alone so the browser,
+      // OS, and any other page listeners still receive them.
+      if (e.metaKey) return;
+      if (swallow.has(e.key)) {
+        e.stopImmediatePropagation();
+        return;
+      }
+      if (isPrintable(e)) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        if (e.type === 'keydown') emulator.keyboard_send_text(e.key);
+      }
+    };
+
+    // Capture phase so this runs before v86's window listener and can block it.
+    window.addEventListener('keydown', handler, true);
+    window.addEventListener('keyup', handler, true);
+  }
+
+  boot();
+</script>
