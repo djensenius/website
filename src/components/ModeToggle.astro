@@ -22,7 +22,7 @@ const terminalHref = clean(`${base}/`);
 const filesHref = clean(`${base}/files/`);
 ---
 
-<nav class="mode-toggle" aria-label="View mode">
+<div class="mode-toggle" role="group" aria-label="View mode">
   <a
     class="mode-btn"
     data-mode="terminal"
@@ -41,7 +41,7 @@ const filesHref = clean(`${base}/files/`);
     <span class="glyph" aria-hidden="true">&#9776;</span>
     <span>Files</span>
   </a>
-</nav>
+</div>
 
 <style>
   .mode-toggle {
@@ -116,10 +116,10 @@ const filesHref = clean(`${base}/files/`);
       return isPath(p) ? p : '';
     };
 
-    const nav = document.querySelector('.mode-toggle');
-    if (!nav) return;
-    const termLink = nav.querySelector('[data-mode="terminal"]');
-    const filesLink = nav.querySelector('[data-mode="files"]');
+    const root = document.querySelector('.mode-toggle');
+    if (!root) return;
+    const termLink = root.querySelector('[data-mode="terminal"]');
+    const filesLink = root.querySelector('[data-mode="files"]');
 
     const sync = () => {
       const file = currentFile();
