@@ -3,6 +3,7 @@
 // component (issue #34) so the landing shell and this route share one boot path.
 import BaseHead from '../../components/BaseHead.astro';
 import Emulator from '../../components/Emulator.astro';
+import Analytics from '../../components/Analytics.astro';
 import ModeToggle from '../../components/ModeToggle.astro';
 
 const title = 'Emulator — David Jensenius';
@@ -16,6 +17,7 @@ const description =
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <BaseHead title={title} description={description} path="/emulator/" />
+    <Analytics />
   </head>
   <body>
     <div class="shell">

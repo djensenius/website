@@ -50,6 +50,21 @@ just v86-smoke  # boot the v86 emulator headless and verify content mounts (#37)
 just serve      # run the self-host container — WIP (#38)
 ```
 
+## Analytics
+
+Analytics are privacy-friendly and opt-in. By default, no analytics script is emitted and
+nothing tracks visitors. To enable Plausible, set `PUBLIC_PLAUSIBLE_DOMAIN` to the
+configured site domain at build time. Optionally set `PUBLIC_PLAUSIBLE_SRC` to a
+self-hosted Plausible script URL. Allowed values are absolute `https://` URLs or
+root-relative `/...` paths (`http://` is allowed only during local dev). Root-relative
+paths are resolved under Astro's `BASE_URL`; an absolute `https://` URL is safest for
+subpath deploys. Empty or unset `PUBLIC_PLAUSIBLE_SRC` defaults to
+`https://plausible.io/js/script.js`.
+
+For GitHub Pages deploys, these public build-time environment variables can be added to the
+build step in [`.github/workflows/deploy-preview.yml`](.github/workflows/deploy-preview.yml).
+Do not hardcode a domain in source.
+
 ## WASM emulator (v86)
 
 The modern in-browser emulator ([v86](https://github.com/copy/v86)) boots a tiny buildroot

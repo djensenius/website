@@ -1,0 +1,14 @@
+---
+import { resolveAnalyticsConfig } from '../lib/analytics';
+
+const analytics = resolveAnalyticsConfig({
+  domain: import.meta.env.PUBLIC_PLAUSIBLE_DOMAIN,
+  src: import.meta.env.PUBLIC_PLAUSIBLE_SRC,
+  baseUrl: import.meta.env.BASE_URL,
+  dev: import.meta.env.DEV,
+});
+---
+
+{
+  analytics && <script is:inline defer data-domain={analytics.domain} src={analytics.src}></script>
+}
