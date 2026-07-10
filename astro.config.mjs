@@ -1,4 +1,5 @@
 // @ts-check
+import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 
 // Normalize BASE_PATH so Astro always receives a value with exactly one leading
@@ -13,5 +14,6 @@ export default defineConfig({
   // BASE_PATH lets the GitHub Pages preview deploy (issue #40) serve from the
   // project subpath (e.g. /website) while production at the custom domain uses '/'.
   base,
+  integrations: [sitemap()],
   // Content lives as Markdown collections under src/content (see issue #17).
 });

@@ -1,8 +1,13 @@
 ---
 // Standalone full-page emulator route. The emulator itself lives in a reusable
 // component (issue #34) so the landing shell and this route share one boot path.
+import BaseHead from '../../components/BaseHead.astro';
 import Emulator from '../../components/Emulator.astro';
 import ModeToggle from '../../components/ModeToggle.astro';
+
+const title = 'Emulator — David Jensenius';
+const description =
+  'A browser-based terminal entrance to the work and portfolio of David Jensenius, composer and media artist.';
 ---
 
 <!doctype html>
@@ -10,11 +15,7 @@ import ModeToggle from '../../components/ModeToggle.astro';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Emulator — David Jensenius</title>
-    <meta
-      name="description"
-      content="Work of David Jensenius."
-    />
+    <BaseHead title={title} description={description} path="/emulator/" />
   </head>
   <body>
     <div class="shell">

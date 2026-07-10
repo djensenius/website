@@ -1,0 +1,41 @@
+---
+import { absoluteSiteUrl } from '../lib/seo';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  canonical?: string;
+  path?: string;
+  type?: string;
+}
+
+const {
+  title,
+  description,
+  image = '/og.png',
+  canonical,
+  path,
+  type = 'website',
+} = Astro.props;
+
+const siteName = 'David Jensenius';
+const site = Astro.site?.href ?? Astro.url.origin;
+const base = import.meta.env.BASE_URL || '/';
+const canonicalUrl = absoluteSiteUrl(canonical ?? path ?? Astro.url.pathname, site, base);
+const imageUrl = absoluteSiteUrl(image, site, base);
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalUrl} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:image" content={imageUrl} />
+<meta property="og:site_name" content={siteName} />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={imageUrl} />

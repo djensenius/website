@@ -6,10 +6,15 @@
 // static fallback routes (issue #23) so it degrades gracefully and shares one
 // source of rendered HTML. Deep-links via the URL hash (e.g. #/projects/<id>).
 // Vanilla TS by design — the spike showed no framework is warranted here.
-const base = import.meta.env.BASE_URL;
-const bioHref = `${base}files/info/bio`.replace(/\/{2,}/g, '/');
+import BaseHead from '../../components/BaseHead.astro';
 import ModeToggle from '../../components/ModeToggle.astro';
 import '../../styles/file-view.css';
+
+const base = import.meta.env.BASE_URL;
+const bioHref = `${base}files/info/bio`.replace(/\/{2,}/g, '/');
+const title = 'Files — David Jensenius';
+const description =
+  'Browse the work, biography, and projects of David Jensenius, composer and media artist.';
 ---
 
 <!doctype html>
@@ -17,8 +22,7 @@ import '../../styles/file-view.css';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Files — David Jensenius</title>
-    <meta name="description" content="Browse the work of David Jensenius." />
+    <BaseHead title={title} description={description} path="/files/" />
   </head>
   <body data-base={base}>
     <div class="modebar">
