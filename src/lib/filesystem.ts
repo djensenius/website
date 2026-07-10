@@ -9,10 +9,6 @@ export { fileNodes } from './manifest';
  * (issue #21). Thin astro:content adapter over the pure `assembleManifest` logic.
  */
 export async function buildManifest(): Promise<FilesystemManifest> {
-  const [pages, projects, code] = await Promise.all([
-    getCollection('pages'),
-    getCollection('projects'),
-    getCollection('code'),
-  ]);
-  return assembleManifest(pages, projects, code);
+  const [pages, projects] = await Promise.all([getCollection('pages'), getCollection('projects')]);
+  return assembleManifest(pages, projects);
 }

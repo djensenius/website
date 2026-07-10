@@ -86,7 +86,7 @@ licenses and source pointers are documented in
 replacing the old manual `sudo mount -o loop` editing. The build:
 
 1. `scripts/gen-emulator-content.mjs` strips frontmatter from `src/content/**` and writes a
-   plain-text tree (`bio.txt`, `projects/<id>.txt`, `code/repos.txt`, …).
+   plain-text tree (`info/bio.txt`, `projects/<id>.txt`, …).
 2. `scripts/build-image.sh` copies the pristine base rootfs (`root.bin`) and, inside a
    Docker container with `e2tools`, swaps in the freshly generated `/root` content — no
    privileged loop mount required — writing `public/emulator/root.bin`.

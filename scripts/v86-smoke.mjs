@@ -45,11 +45,15 @@ const timer = setInterval(async () => {
   if (stage === 0 && /[#$%]\s*$/.test(out.slice(-8))) {
     stage = 1;
     out = '';
-    send('ls /mnt && echo LISTED && head -3 /mnt/bio.txt && echo DONE_MARKER');
+    send('ls /mnt && ls /mnt/info && echo LISTED && head -3 /mnt/info/bio.txt && echo DONE_MARKER');
   } else if (stage === 1 && out.includes('DONE_MARKER')) {
     stage = 2;
     clearInterval(timer);
-    const ok = out.includes('bio.txt') && out.includes('projects') && out.includes('LISTED');
+    const ok =
+      out.includes('info') &&
+      out.includes('bio.txt') &&
+      out.includes('projects') &&
+      out.includes('LISTED');
     console.error(`\n\n[HARNESS] mount+list ${ok ? 'PASS' : 'FAIL'}`);
     await emulator.destroy();
     process.exit(ok ? 0 : 1);

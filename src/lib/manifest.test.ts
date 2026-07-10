@@ -3,7 +3,6 @@ import {
   assembleManifest,
   fileNodes,
   sortProjects,
-  type CodeInput,
   type PageInput,
   type ProjectInput,
 } from './manifest';
@@ -20,14 +19,12 @@ const projects: ProjectInput[] = [
   { id: '2004-of-dinger', data: { title: 'of Dinger', year: 2004 } },
 ];
 
-const code: CodeInput[] = [{ id: 'repos', data: { title: 'repos' } }];
-
 const now = new Date('2024-01-01T00:00:00.000Z');
 
 test('pages are ordered by their order field', () => {
-  const { nodes } = assembleManifest(pages, projects, code, now);
+  const { nodes } = assembleManifest(pages, projects, now);
   const pagePaths = nodes.filter((n) => n.collection === 'pages').map((n) => n.path);
-  expect(pagePaths).toEqual(['/bio', '/cv', '/contact']);
+  expect(pagePaths).toEqual(['/info/bio', '/info/cv', '/info/contact']);
 });
 
 test('projects sort newest-first: no-year first, then year desc, then id desc', () => {
@@ -35,32 +32,32 @@ test('projects sort newest-first: no-year first, then year desc, then id desc', 
   expect(sorted).toEqual(['ongoing-foundsounds', '2016-telephone-booth', '2004-of-dinger']);
 });
 
-test('directories are listed before their files and before top-level pages', () => {
-  const { nodes } = assembleManifest(pages, projects, code, now);
+test('info appears first, then projects and their files', () => {
+  const { nodes } = assembleManifest(pages, projects, now);
+  const infoDirIdx = nodes.findIndex((n) => n.path === '/info');
+  const firstPageIdx = nodes.findIndex((n) => n.collection === 'pages');
   const projectsDirIdx = nodes.findIndex((n) => n.path === '/projects');
   const firstProjectIdx = nodes.findIndex((n) => n.collection === 'projects');
-  const firstPageIdx = nodes.findIndex((n) => n.collection === 'pages');
-  expect(projectsDirIdx).toBe(0);
+  expect(infoDirIdx).toBe(0);
+  expect(infoDirIdx).toBeLessThan(firstPageIdx);
+  expect(firstPageIdx).toBeLessThan(projectsDirIdx);
   expect(projectsDirIdx).toBeLessThan(firstProjectIdx);
-  // Top-level page files come after the directories and their contents.
-  expect(firstPageIdx).toBeGreaterThan(firstProjectIdx);
 });
 
 test('file paths are namespaced by collection', () => {
-  const { nodes } = assembleManifest(pages, projects, code, now);
+  const { nodes } = assembleManifest(pages, projects, now);
   expect(nodes.find((n) => n.entryId === '2004-of-dinger')?.path).toBe('/projects/2004-of-dinger');
-  expect(nodes.find((n) => n.entryId === 'repos')?.path).toBe('/code/repos');
-  expect(nodes.find((n) => n.entryId === 'bio')?.path).toBe('/bio');
+  expect(nodes.find((n) => n.entryId === 'bio')?.path).toBe('/info/bio');
 });
 
 test('fileNodes excludes directories', () => {
-  const manifest = assembleManifest(pages, projects, code, now);
+  const manifest = assembleManifest(pages, projects, now);
   const files = fileNodes(manifest);
   expect(files.every((n) => n.kind === 'file')).toBe(true);
-  expect(files).toHaveLength(pages.length + projects.length + code.length);
+  expect(files).toHaveLength(pages.length + projects.length);
 });
 
 test('generatedAt reflects the provided clock', () => {
-  const { generatedAt } = assembleManifest(pages, projects, code, now);
+  const { generatedAt } = assembleManifest(pages, projects, now);
   expect(generatedAt).toBe('2024-01-01T00:00:00.000Z');
 });

@@ -1,11 +1,5 @@
 import { expect, test } from 'vitest';
-import {
-  parse,
-  parseFrontmatter,
-  renderCode,
-  renderPage,
-  renderProject,
-} from './gen-emulator-content.mjs';
+import { parse, parseFrontmatter, renderPage, renderProject } from './gen-emulator-content.mjs';
 
 test('parse splits frontmatter and body', () => {
   const { fm, body } = parse('---\ntitle: bio\norder: 1\n---\n\nHello world.\n');
@@ -20,14 +14,14 @@ test('parse tolerates content with no frontmatter', () => {
   expect(body).toBe('Just text.');
 });
 
-test('parseFrontmatter reads the repos list', () => {
+test('parseFrontmatter reads the links list', () => {
   const fm = parseFrontmatter(
-    'title: repos\nrepos:\n  - name: website\n    url: https://example.com/website\n  - name: gopod\n    url: https://example.com/gopod',
+    'title: project\nlinks:\n  - label: Source\n    url: https://example.com/source\n  - label: More information\n    url: https://example.com/info',
   );
-  expect(fm.title).toBe('repos');
-  expect(fm.repos).toEqual([
-    { name: 'website', url: 'https://example.com/website' },
-    { name: 'gopod', url: 'https://example.com/gopod' },
+  expect(fm.title).toBe('project');
+  expect(fm.links).toEqual([
+    { label: 'Source', url: 'https://example.com/source' },
+    { label: 'More information', url: 'https://example.com/info' },
   ]);
 });
 
@@ -39,20 +33,16 @@ test('renderPage underlines the title', () => {
 test('renderProject includes year and summary', () => {
   const out = renderProject({
     id: '2016-telephone-booth',
-    fm: { title: 'Telephone Booth', year: '2016', summary: 'A phone booth.' },
+    fm: {
+      title: 'Telephone Booth',
+      year: '2016',
+      summary: 'A phone booth.',
+      links: [{ label: 'Source', url: 'https://example.com/source' }],
+    },
     body: 'Body text.',
   });
   expect(out).toContain('Telephone Booth (2016)');
   expect(out).toContain('A phone booth.');
+  expect(out).toContain('Source: https://example.com/source');
   expect(out).toContain('Body text.');
-});
-
-test('renderCode lists repositories as name — url', () => {
-  const out = renderCode({
-    id: 'repos',
-    fm: { title: 'repos', repos: [{ name: 'website', url: 'https://example.com/website' }] },
-    body: 'More at example.',
-  });
-  expect(out).toContain('website — https://example.com/website');
-  expect(out).toContain('More at example.');
 });

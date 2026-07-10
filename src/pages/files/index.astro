@@ -7,7 +7,7 @@
 // source of rendered HTML. Deep-links via the URL hash (e.g. #/projects/<id>).
 // Vanilla TS by design — the spike showed no framework is warranted here.
 const base = import.meta.env.BASE_URL;
-const bioHref = `${base}files/bio`.replace(/\/{2,}/g, '/');
+const bioHref = `${base}files/info/bio`.replace(/\/{2,}/g, '/');
 import ModeToggle from '../../components/ModeToggle.astro';
 import '../../styles/file-view.css';
 ---
@@ -137,8 +137,9 @@ import '../../styles/file-view.css';
         const path = location.hash.replace(/^#/, '');
         if (path) void open(path);
         else {
-          markCurrent(null);
-          empty.hidden = false;
+          const defaultPath = '/info/bio';
+          history.replaceState(null, '', `#${defaultPath}`);
+          void open(defaultPath);
         }
       }
 

@@ -9,7 +9,7 @@ export type FsNode = {
   /** Human-friendly title (files only). */
   title?: string;
   /** Owning collection (files only). */
-  collection?: 'pages' | 'projects' | 'code';
+  collection?: 'pages' | 'projects';
   /** Content entry id within its collection (files only). */
   entryId?: string;
   /** Year, for projects. */
@@ -40,8 +40,6 @@ export type ProjectInput = {
     media?: FsNode['media'];
   };
 };
-export type CodeInput = { id: string; data: { title: string } };
-
 export function sortPages<T extends PageInput>(pages: T[]): T[] {
   return [...pages].sort((a, b) => a.data.order - b.data.order);
 }
@@ -58,13 +56,9 @@ export function sortProjects<T extends ProjectInput>(projects: T[]): T[] {
   });
 }
 
-export function sortCode<T extends CodeInput>(code: T[]): T[] {
-  return [...code].sort((a, b) => a.id.localeCompare(b.id));
-}
-
 function pageNode(entry: PageInput): FsNode {
   return {
-    path: `/${entry.id}`,
+    path: `/info/${entry.id}`,
     name: entry.id,
     kind: 'file',
     title: entry.data.title,
@@ -88,36 +82,22 @@ function projectNode(entry: ProjectInput): FsNode {
   };
 }
 
-function codeNode(entry: CodeInput): FsNode {
-  return {
-    path: `/code/${entry.id}`,
-    name: entry.id,
-    kind: 'file',
-    title: entry.data.title,
-    collection: 'code',
-    entryId: entry.id,
-  };
-}
-
 /**
  * Assemble the virtual filesystem manifest from already-fetched collection entries.
- * Directories are listed first (each followed by its files, newest-first); the
- * top-level page "files" (bio/cv/contact) come last, in their defined order.
+ * The info directory and its pages come first, followed by projects newest-first.
  * Ordering is deterministic so navigation and generated HTML are stable.
  * Pure and runtime-agnostic so it can be unit-tested without astro:content.
  */
 export function assembleManifest(
   pages: PageInput[],
   projects: ProjectInput[],
-  code: CodeInput[],
   now: Date = new Date(),
 ): FilesystemManifest {
   const nodes: FsNode[] = [
+    { path: '/info', name: 'info', kind: 'dir' },
+    ...sortPages(pages).map(pageNode),
     { path: '/projects', name: 'projects', kind: 'dir' },
     ...sortProjects(projects).map(projectNode),
-    { path: '/code', name: 'code', kind: 'dir' },
-    ...sortCode(code).map(codeNode),
-    ...sortPages(pages).map(pageNode),
   ];
   return { generatedAt: now.toISOString(), nodes };
 }

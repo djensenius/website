@@ -4,8 +4,7 @@
 // filesystem, which scripts/build-image.sh injects into the bootable disk image.
 //
 // Output layout (under the staging dir passed as argv[2], default build/emulator-root):
-//   bio.txt  cv.txt  contact.txt        (from src/content/pages)
-//   code/repos.txt                      (from src/content/code)
+//   info/bio.txt  info/cv.txt  info/contact.txt   (from src/content/pages)
 //   projects/<id>.txt                   (from src/content/projects)
 //   LICENSE                             (copied from root/LICENSE)
 import { readFileSync, readdirSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
@@ -23,8 +22,8 @@ export function parse(md) {
 }
 
 // Minimal YAML reader for this repo's frontmatter: scalar `key: value` pairs
-// plus the `repos:` list of `{ name, url }` items. Other list-style keys such as
-// `tags:` are intentionally ignored — they aren't needed in the plain-text
+// plus the `links:` list of `{ label, url }` items. Other list-style keys such
+// as `tags:` are intentionally ignored — they aren't needed in the plain-text
 // emulator output. Not a general YAML parser.
 export function parseFrontmatter(src) {
   const fm = {};
@@ -34,23 +33,23 @@ export function parseFrontmatter(src) {
     const kv = line.match(/^([A-Za-z0-9_]+):\s*(.*)$/);
     if (!kv) continue;
     const [, key, rawValue] = kv;
-    if (key === 'repos' && rawValue === '') {
-      const repos = [];
+    if (key === 'links' && rawValue === '') {
+      const links = [];
       let cur = null;
       for (let j = i + 1; j < lines.length; j++) {
         const item = lines[j];
-        const name = item.match(/^\s*-\s*name:\s*(.*)$/);
+        const label = item.match(/^\s*-\s*label:\s*(.*)$/);
         const url = item.match(/^\s*url:\s*(.*)$/);
-        if (name) {
-          cur = { name: name[1].trim() };
-          repos.push(cur);
+        if (label) {
+          cur = { label: label[1].trim() };
+          links.push(cur);
         } else if (url && cur) {
           cur.url = url[1].trim();
         } else if (/^\S/.test(item)) {
           break;
         }
       }
-      fm.repos = repos;
+      fm.links = links;
       continue;
     }
     if (rawValue !== '') fm[key] = rawValue.trim();
@@ -79,17 +78,9 @@ function writeFile(outDir, relPath, contents) {
   writeFileSync(full, contents.endsWith('\n') ? contents : `${contents}\n`);
 }
 
-/** Render a page/code/project entry to the text body written into the image. */
+/** Render a page/project entry to the text body written into the image. */
 export function renderPage(page) {
   return `${underline(page.fm.title ?? page.id)}\n${page.body}\n`;
-}
-
-export function renderCode(entry) {
-  const repos = (entry.fm.repos ?? []).map((r) => `  ${r.name} — ${r.url}`).join('\n');
-  const parts = [underline(entry.fm.title ?? entry.id)];
-  if (repos) parts.push(`${repos}\n`);
-  parts.push(entry.body);
-  return `${parts.join('\n')}\n`;
 }
 
 export function renderProject(project) {
@@ -97,7 +88,9 @@ export function renderProject(project) {
     ? `${project.fm.title} (${project.fm.year})`
     : (project.fm.title ?? project.id);
   const summary = project.fm.summary ? `${project.fm.summary}\n` : '';
-  return `${underline(header)}\n${summary}\n${project.body}\n`;
+  const links = (project.fm.links ?? []).map((link) => `${link.label}: ${link.url}`).join('\n');
+  const linksBlock = links ? `${links}\n\n` : '';
+  return `${underline(header)}\n${summary}\n${linksBlock}${project.body}\n`;
 }
 
 /**
@@ -116,8 +109,7 @@ export function buildContentTree({ includeLegacyLicense = true } = {}) {
   const push = (path, contents) => {
     files.push({ path, contents: contents.endsWith('\n') ? contents : `${contents}\n` });
   };
-  for (const page of readCollection('pages')) push(`${page.id}.txt`, renderPage(page));
-  for (const entry of readCollection('code')) push(`code/${entry.id}.txt`, renderCode(entry));
+  for (const page of readCollection('pages')) push(`info/${page.id}.txt`, renderPage(page));
   for (const project of readCollection('projects')) {
     push(`projects/${project.id}.txt`, renderProject(project));
   }
