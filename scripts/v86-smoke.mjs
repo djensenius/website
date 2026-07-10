@@ -7,16 +7,17 @@ const url = (p) => join(dir, p);
 
 const emulator = new V86({
   wasm_path: url('v86.wasm'),
-  memory_size: 128 * 1024 * 1024,
+  memory_size: 256 * 1024 * 1024,
   vga_memory_size: 2 * 1024 * 1024,
   bios: { url: url('bios/seabios.bin') },
   vga_bios: { url: url('bios/vgabios.bin') },
   bzimage: { url: url('buildroot-bzimage.bin') },
+  initrd: { url: url('buildroot-initrd.bin') },
   filesystem: {
     basefs: { url: url('fs.json') },
     baseurl: url('fs') + '/',
   },
-  cmdline: 'tsc=reliable mitigations=off random.trust_cpu=on',
+  cmdline: 'console=ttyS0 console=tty0 tsc=reliable mitigations=off random.trust_cpu=on noapic',
   autostart: true,
 });
 
@@ -31,7 +32,7 @@ function send(cmd) {
 }
 
 const start = Date.now();
-const timeout = 60000;
+const timeout = 180000;
 let stage = 0;
 
 const timer = setInterval(async () => {
@@ -41,7 +42,7 @@ const timer = setInterval(async () => {
     await emulator.destroy();
     process.exit(2);
   }
-  if (stage === 0 && /[#%]\s*$/.test(out.slice(-8))) {
+  if (stage === 0 && /[#$%]\s*$/.test(out.slice(-8))) {
     stage = 1;
     out = '';
     send('ls /mnt && echo LISTED && head -3 /mnt/bio.txt && echo DONE_MARKER');

@@ -4,9 +4,8 @@
 // to the plain file-navigation view. A proper emulator↔file-nav toggle comes in
 // issue #35.
 import Emulator from '../components/Emulator.astro';
+import ModeToggle from '../components/ModeToggle.astro';
 const title = 'David Jensenius';
-const base = import.meta.env.BASE_URL;
-const filesHref = `${base}files/`.replace(/\/{2,}/g, '/');
 ---
 
 <!doctype html>
@@ -17,17 +16,18 @@ const filesHref = `${base}files/`.replace(/\/{2,}/g, '/');
     <title>{title}</title>
     <meta
       name="description"
-      content="David Jensenius — composer and media artist. A tiny Linux, running in your browser, holding his work."
+      content="David Jensenius composer and media artist."
     />
   </head>
   <body>
     <div class="shell">
       <header class="masthead">
-        <h1>{title}</h1>
+        <div class="titlebar">
+          <h1>{title}</h1>
+          <ModeToggle active="terminal" />
+        </div>
         <p class="tagline">
-          Composer and media artist. This site is a tiny Linux running in your
-          browser — your files are in <code>/mnt</code>. Prefer plain pages?
-          <a href={filesHref}>Browse the files</a>.
+          Composer and media artist. Switch to <strong>Files</strong> above for plain pages.
         </p>
       </header>
       <main class="stage">
@@ -79,6 +79,14 @@ const filesHref = `${base}files/`.replace(/\/{2,}/g, '/');
       .masthead {
         flex: 0 0 auto;
         margin-bottom: 0.75rem;
+      }
+
+      .titlebar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
       }
 
       .masthead h1 {
