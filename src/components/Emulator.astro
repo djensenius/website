@@ -416,12 +416,15 @@ const noteId = `terminal-note-${uid}`;
     if (container) {
       container.addEventListener('pointerdown', () => {
         window.__v86ActiveScreen = screenId;
+        container.focus({ preventScroll: true });
       });
       container.addEventListener('focusin', () => {
         window.__v86ActiveScreen = screenId;
       });
     }
     const isActive = () => window.__v86ActiveScreen === screenId;
+    const screenHasFocus = () =>
+      container && document.activeElement && container.contains(document.activeElement);
     const selectedInside = () => {
       const selection = window.getSelection();
       if (!selection || selection.isCollapsed || !selection.toString()) return false;
@@ -435,6 +438,7 @@ const noteId = `terminal-note-${uid}`;
         e.stopImmediatePropagation();
         return;
       }
+      if (!screenHasFocus()) return;
       // Leave Cmd/Win shortcuts (copy, paste, …) alone so the browser, OS, and
       // any other page listeners still receive them. The exception is selected
       // emulator text above: Cmd/Ctrl+C is stopped there so the guest does not
