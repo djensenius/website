@@ -73,6 +73,23 @@ const screenId = `screen_container-${uid}`;
     setupKeyboard(emulator);
     const refit = setupScaleToFill(emulator);
 
+    // Deep-link support (issue #35): the mode toggle / a shared link can request
+    // a specific file be opened in the terminal via ?open=/projects/<id>. The
+    // Files view and this terminal keep the same manifest paths, mapped here to
+    // the guest filesystem as /mnt<path>.txt. Only strict manifest-style paths
+    // are accepted, so the value is safe to splice into the `cat` command below.
+    const openTarget = () => {
+      const raw = new URLSearchParams(location.search).get('open');
+      if (!raw) return null;
+      let path;
+      try {
+        path = decodeURIComponent(raw);
+      } catch {
+        return null;
+      }
+      return /^\/[A-Za-z0-9][A-Za-z0-9/_-]*$/.test(path) ? path : null;
+    };
+
     // Once the shell is ready, set up a themed environment and drop the visitor
     // into the content at /mnt. This runs every boot (the stock buildroot image
     // is read-only), so all customization is applied here over the serial line
@@ -99,8 +116,10 @@ const screenId = `screen_container-${uid}`;
       'echo',
       // Drop into the content.
       'cd /mnt',
-      'ls',
     ];
+    // With a deep-link, show the requested file; otherwise list the content.
+    const target = openTarget();
+    setup.push(target ? `cat /mnt${target}.txt` : 'ls');
 
     let greeted = false;
     let buffer = '';

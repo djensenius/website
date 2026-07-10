@@ -1,0 +1,140 @@
+---
+// Mode toggle (issue #35). A small segmented control that switches between the
+// two ways to explore the site — the full Linux **Terminal** (the v86 emulator)
+// and the plain **Files** browser — and back. Shared by the landing shell, the
+// standalone /emulator route, and the /files view so the control looks and
+// behaves the same everywhere.
+//
+// It also carries the currently open file across a switch so a deep-link opens
+// in either mode: the Files view tracks the open file in `location.hash`
+// (e.g. #/bio) and the Terminal tracks it in `?open=` (e.g. ?open=/bio). The
+// inline script below rewrites the "other" link at runtime to hand the current
+// file to the destination. Without JavaScript the links still work — they just
+// don't carry the open file — so the control degrades gracefully.
+interface Props {
+  /** Which view is currently showing, so its button reads as current. */
+  active: 'terminal' | 'files';
+}
+const { active } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const clean = (p: string) => p.replace(/\/{2,}/g, '/');
+const terminalHref = clean(`${base}/`);
+const filesHref = clean(`${base}/files/`);
+---
+
+<nav class="mode-toggle" aria-label="View mode">
+  <a
+    class="mode-btn"
+    data-mode="terminal"
+    href={terminalHref}
+    aria-current={active === 'terminal' ? 'page' : undefined}
+  >
+    <span class="glyph" aria-hidden="true">&gt;_</span>
+    <span>Terminal</span>
+  </a>
+  <a
+    class="mode-btn"
+    data-mode="files"
+    href={filesHref}
+    aria-current={active === 'files' ? 'page' : undefined}
+  >
+    <span class="glyph" aria-hidden="true">&#9776;</span>
+    <span>Files</span>
+  </a>
+</nav>
+
+<style>
+  .mode-toggle {
+    display: inline-flex;
+    gap: 0;
+    border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8rem;
+    line-height: 1;
+  }
+
+  .mode-btn {
+    all: unset;
+    box-sizing: border-box;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.7rem;
+    color: inherit;
+    opacity: 0.7;
+    white-space: nowrap;
+  }
+
+  .mode-btn + .mode-btn {
+    border-left: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  }
+
+  .mode-btn:hover {
+    opacity: 1;
+    background: color-mix(in srgb, currentColor 10%, transparent);
+  }
+
+  .mode-btn:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -2px;
+    opacity: 1;
+  }
+
+  .mode-btn[aria-current='page'] {
+    opacity: 1;
+    font-weight: 700;
+    background: color-mix(in srgb, currentColor 15%, transparent);
+    cursor: default;
+  }
+
+  .glyph {
+    opacity: 0.8;
+    font-weight: 700;
+  }
+</style>
+
+<script is:inline define:vars={{ active, terminalHref, filesHref }}>
+  (function () {
+    // Only manifest-style paths (/bio, /projects/<id>, /code/<id>) are carried
+    // between modes — never arbitrary strings — so the value is safe to build a
+    // URL and a shell `cat` command from on the other side.
+    const isPath = (p) => /^\/[A-Za-z0-9][A-Za-z0-9/_-]*$/.test(p);
+    const currentFile = () => {
+      const raw =
+        active === 'files'
+          ? location.hash.replace(/^#/, '')
+          : new URLSearchParams(location.search).get('open') || '';
+      let p = '';
+      try {
+        p = decodeURIComponent(raw);
+      } catch {
+        p = '';
+      }
+      return isPath(p) ? p : '';
+    };
+
+    const nav = document.querySelector('.mode-toggle');
+    if (!nav) return;
+    const termLink = nav.querySelector('[data-mode="terminal"]');
+    const filesLink = nav.querySelector('[data-mode="files"]');
+
+    const sync = () => {
+      const file = currentFile();
+      if (active === 'files' && termLink) {
+        // Hand the open file to the Terminal via ?open=.
+        termLink.href = file ? `${terminalHref}?open=${encodeURIComponent(file)}` : terminalHref;
+      } else if (active === 'terminal' && filesLink) {
+        // Hand the open file to the Files view via its hash.
+        filesLink.href = file ? `${filesHref}#${file}` : filesHref;
+      }
+    };
+
+    sync();
+    // In the Files view the open file changes as the user navigates the hash;
+    // keep the Terminal link in step so it always carries the latest selection.
+    if (active === 'files') window.addEventListener('hashchange', sync);
+  })();
+</script>
