@@ -16,8 +16,44 @@ import Emulator from '../../components/Emulator.astro';
     />
   </head>
   <body>
-    <main style="padding: 1.5rem 1rem;">
+    <main class="stage">
       <Emulator />
     </main>
+
+    <style>
+      :root {
+        color-scheme: light dark;
+        --shell-bg: #0b0b0b;
+        --shell-fg: #d7d7d7;
+      }
+
+      @media (prefers-color-scheme: light) {
+        :root {
+          --shell-bg: #fbfbfa;
+          --shell-fg: #1a1a1a;
+        }
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        background: var(--shell-bg);
+        color: var(--shell-fg);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+
+      /* Full-viewport emulator. */
+      .stage {
+        display: flex;
+        height: 100vh;
+        height: 100dvh;
+        padding: 1rem;
+        box-sizing: border-box;
+      }
+    </style>
   </body>
 </html>

@@ -16,14 +16,20 @@ const config = {
   baseurl: asset('fs/'),
 };
 import '../styles/emulator.css';
+
+// Per-instance element IDs so multiple emulators can coexist on one page and the
+// inline script always binds to its own instance (v86 needs a real element/ID).
+const uid = crypto.randomUUID().slice(0, 8);
+const statusId = `status-${uid}`;
+const screenId = `screen_container-${uid}`;
 ---
 
 <div class="emulator">
-  <p id="status" class="status" role="status" aria-live="polite">Booting Linux…</p>
+  <p id={statusId} class="status" role="status" aria-live="polite">Booting Linux…</p>
   <!-- v86's ScreenAdapter toggles the inline `display` of these two children to
        switch between text and graphical (VGA) modes, so the initial state is set
        inline here rather than in CSS. -->
-  <div id="screen_container" class="screen">
+  <div id={screenId} class="screen">
     <div class="screen-text" style="display: block"></div>
     <canvas class="screen-canvas" style="display: none"></canvas>
   </div>
@@ -33,8 +39,8 @@ import '../styles/emulator.css';
   </p>
 </div>
 
-<script is:inline define:vars={{ config }}>
-  const statusEl = document.getElementById('status');
+<script is:inline define:vars={{ config, statusId, screenId }}>
+  const statusEl = document.getElementById(statusId);
   const setStatus = (text) => {
     if (statusEl) statusEl.textContent = text;
   };
@@ -53,7 +59,7 @@ import '../styles/emulator.css';
       wasm_path: config.wasmPath,
       memory_size: 128 * 1024 * 1024,
       vga_memory_size: 4 * 1024 * 1024,
-      screen_container: document.getElementById('screen_container'),
+      screen_container: document.getElementById(screenId),
       bios: { url: config.bios },
       vga_bios: { url: config.vgaBios },
       bzimage: { url: config.bzimage, async: false },
@@ -83,28 +89,29 @@ import '../styles/emulator.css';
 
   // Scale the emulated display to fill its container's width. v86 renders the
   // buildroot console at a fixed 80×25 text grid; screen_set_scale applies a CSS
-  // transform (and matching box size) so the terminal grows with the layout
-  // column instead of overflowing on narrow screens or looking tiny on wide ones.
+  // Scale the emulated display to fit its container. v86 renders the buildroot
+  // console at a fixed 80×25 text grid; screen_set_scale applies a CSS transform
+  // so the terminal fills the available space (both width and height) instead of
+  // sitting tiny in the corner or overflowing.
   function setupScaleToFill(emulator) {
-    const container = document.getElementById('screen_container');
+    const container = document.getElementById(screenId);
     if (!container) return;
 
-    // The real, unscaled width of the display. The text rows are block-level, so
-    // their bounding box just reports the parent width; the actual 80-column text
-    // overflows invisibly. Measure it with a Range over the widest row instead.
-    // In graphical (VGA) mode the canvas has an intrinsic pixel width we can use.
-    const naturalWidth = (text, canvas) => {
+    // The real, unscaled size of the display. The text rows are block-level, so
+    // their bounding box reports the parent width; the actual 80-column text
+    // overflows invisibly. Measure the width with a Range over the widest row.
+    // In graphical (VGA) mode the canvas has intrinsic pixel dimensions.
+    const naturalSize = (text, canvas) => {
       if (text && text.style.display !== 'none') {
-        let max = 0;
+        let w = 0;
         for (const row of text.children) {
           const range = document.createRange();
           range.selectNodeContents(row);
-          const w = range.getBoundingClientRect().width;
-          if (w > max) max = w;
+          w = Math.max(w, range.getBoundingClientRect().width);
         }
-        return max;
+        return { w, h: text.getBoundingClientRect().height };
       }
-      return canvas ? canvas.width : 0;
+      return canvas ? { w: canvas.width, h: canvas.height } : { w: 0, h: 0 };
     };
 
     const fit = () => {
@@ -114,12 +121,19 @@ import '../styles/emulator.css';
 
       // Reset to 1:1 so the measurement reflects the unscaled display.
       emulator.screen_set_scale(1, 1);
-      const natural = naturalWidth(text, canvas);
-      if (!natural) return false;
+      const natural = naturalSize(text, canvas);
+      if (!natural.w || !natural.h) return false;
       const style = getComputedStyle(container);
       const padX = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
-      const available = container.clientWidth - padX;
-      const scale = Math.max(0.5, Math.min(available / natural, 4));
+      const padY = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+      const availW = container.clientWidth - padX;
+      const availH = container.clientHeight - padY;
+      // Fit to whichever dimension is the tighter constraint so the whole
+      // terminal stays visible while filling as much space as possible.
+      const scale = Math.max(
+        0.5,
+        Math.min(availW / natural.w, availH / natural.h, 6),
+      );
       emulator.screen_set_scale(scale, scale);
       return true;
     };
@@ -158,11 +172,9 @@ import '../styles/emulator.css';
 
     const handler = (e) => {
       if (editable(e.target)) return;
-      // Leave Cmd/Win shortcuts (copy, paste, …) to the browser/OS.
-      if (e.metaKey) {
-        e.stopImmediatePropagation();
-        return;
-      }
+      // Leave Cmd/Win shortcuts (copy, paste, …) entirely alone so the browser,
+      // OS, and any other page listeners still receive them.
+      if (e.metaKey) return;
       if (swallow.has(e.key)) {
         e.stopImmediatePropagation();
         return;

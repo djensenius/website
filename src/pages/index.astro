@@ -21,7 +21,7 @@ const filesHref = `${base}files/`.replace(/\/{2,}/g, '/');
     />
   </head>
   <body>
-    <main class="shell">
+    <div class="shell">
       <header class="masthead">
         <h1>{title}</h1>
         <p class="tagline">
@@ -30,8 +30,10 @@ const filesHref = `${base}files/`.replace(/\/{2,}/g, '/');
           <a href={filesHref}>Browse the files</a>.
         </p>
       </header>
-      <Emulator />
-    </main>
+      <main class="stage">
+        <Emulator />
+      </main>
+    </div>
 
     <style>
       :root {
@@ -51,6 +53,11 @@ const filesHref = `${base}files/`.replace(/\/{2,}/g, '/');
         }
       }
 
+      html,
+      body {
+        height: 100%;
+      }
+
       body {
         margin: 0;
         background: var(--shell-bg);
@@ -58,14 +65,20 @@ const filesHref = `${base}files/`.replace(/\/{2,}/g, '/');
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       }
 
+      /* Full-viewport column: a compact header with my info, then the emulator
+       * filling all remaining height. */
       .shell {
-        max-width: 60rem;
-        margin: 0 auto;
-        padding: 1.5rem 1rem 2.5rem;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        height: 100dvh;
+        padding: 1rem 1rem 1.25rem;
+        box-sizing: border-box;
       }
 
       .masthead {
-        margin-bottom: 1.25rem;
+        flex: 0 0 auto;
+        margin-bottom: 0.75rem;
       }
 
       .masthead h1 {
@@ -78,10 +91,18 @@ const filesHref = `${base}files/`.replace(/\/{2,}/g, '/');
         max-width: 46rem;
         color: var(--shell-muted);
         line-height: 1.5;
+        font-size: 0.9rem;
       }
 
       .tagline a {
         color: var(--shell-link);
+      }
+
+      /* The emulator fills the leftover vertical space. */
+      .stage {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
       }
     </style>
   </body>
