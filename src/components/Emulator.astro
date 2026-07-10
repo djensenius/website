@@ -421,10 +421,14 @@ const noteId = `terminal-note-${uid}`;
           container.focus();
         }
       };
-      container.addEventListener('pointerdown', () => {
-        window.__v86ActiveScreen = screenId;
-        focusScreen();
-      });
+      container.addEventListener(
+        'pointerdown',
+        () => {
+          window.__v86ActiveScreen = screenId;
+          focusScreen();
+        },
+        true,
+      );
       container.addEventListener('focusin', () => {
         window.__v86ActiveScreen = screenId;
       });
