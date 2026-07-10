@@ -218,6 +218,7 @@ const scrollbackId = `scrollback-${uid}`;
     // keep mouse events on .screen-text available for native browser selection.
     const preserveSelection = (event) => {
       window.__v86ActiveScreen = screenId;
+      if (event.type === 'mousemove' && event.buttons === 0) return;
       event.stopPropagation();
     };
     if (textScreen) {
@@ -237,15 +238,6 @@ const scrollbackId = `scrollback-${uid}`;
       if (!selection || selection.isCollapsed || !selection.toString()) return false;
       return root.contains(selection.anchorNode) || root.contains(selection.focusNode);
     };
-
-    const copySelectionShortcut = (event) => {
-      const key = event.key && event.key.toLowerCase();
-      if (key !== 'c' || (!event.metaKey && !event.ctrlKey) || !selectionInside()) return;
-      // Do not prevent the browser copy; just stop v86 from also receiving Ctrl+C.
-      event.stopImmediatePropagation();
-    };
-    window.addEventListener('keydown', copySelectionShortcut, true);
-    window.addEventListener('keyup', copySelectionShortcut, true);
 
     const setCopyFeedback = (message) => {
       if (!copyButton) return;
@@ -347,10 +339,7 @@ const scrollbackId = `scrollback-${uid}`;
       if (!rows.length) return;
       if (previousRows.length === rows.length) {
         const count = scrolledLineCount(previousRows, rows);
-        if (count) {
-          const scrolledOff = previousRows.slice(0, count);
-          if (scrolledOff.some((line) => /\S/.test(line))) appendLines(scrolledOff);
-        }
+        if (count) appendLines(previousRows.slice(0, count));
       }
       previousRows = rows;
       renderScrollback();
@@ -412,6 +401,7 @@ const scrollbackId = `scrollback-${uid}`;
     // The first instance to boot is active by default; clicking another one's
     // screen makes it active. The active screenId lives on a shared window key.
     const container = document.getElementById(screenId);
+    const root = container && container.closest('.emulator');
     if (window.__v86ActiveScreen === undefined) window.__v86ActiveScreen = screenId;
     if (container) {
       container.addEventListener('pointerdown', () => {
@@ -422,7 +412,7 @@ const scrollbackId = `scrollback-${uid}`;
     const selectedInside = () => {
       const selection = window.getSelection();
       if (!selection || selection.isCollapsed || !selection.toString()) return false;
-      return container && (container.contains(selection.anchorNode) || container.contains(selection.focusNode));
+      return root && (root.contains(selection.anchorNode) || root.contains(selection.focusNode));
     };
 
     const handler = (e) => {
