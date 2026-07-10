@@ -1,4 +1,6 @@
 ---
+import { absoluteSiteUrl } from '../lib/seo';
+
 interface Props {
   title: string;
   description: string;
@@ -20,24 +22,8 @@ const {
 const siteName = 'David Jensenius';
 const site = Astro.site?.href ?? Astro.url.origin;
 const base = import.meta.env.BASE_URL || '/';
-const basePath = `/${base.replace(/^\/+|\/+$/g, '')}/`.replace(/\/{2,}/g, '/');
-const baseWithoutSlash = basePath.replace(/^\/+/, '');
-
-const isAbsoluteUrl = (value: string) => /^https?:\/\//i.test(value);
-
-function absoluteUrl(value: string) {
-  if (isAbsoluteUrl(value)) return value;
-
-  const cleanValue = value.replace(/^\/+/, '');
-  if (baseWithoutSlash && cleanValue.startsWith(baseWithoutSlash)) {
-    return new URL(`/${cleanValue}`, site).href;
-  }
-
-  return new URL(`${basePath}${cleanValue}`, site).href;
-}
-
-const canonicalUrl = absoluteUrl(canonical ?? path ?? Astro.url.pathname);
-const imageUrl = absoluteUrl(image);
+const canonicalUrl = absoluteSiteUrl(canonical ?? path ?? Astro.url.pathname, site, base);
+const imageUrl = absoluteSiteUrl(image, site, base);
 ---
 
 <title>{title}</title>
