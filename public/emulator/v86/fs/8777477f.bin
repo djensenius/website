@@ -1,12 +1,6 @@
----
-title: Emoticon Music
-year: 2005
-summary: A packet sniffer sonifies emoticons crossing a network to reveal a location's mood.
-tags:
-  - composition
-  - network
-  - data
----
+# Emoticon Music (2005)
+
+A packet sniffer sonifies emoticons crossing a network to reveal a location's mood.
 
 Emoticons are popular ways to express a certain feeling in internet emails or instant messages. In this piece, a packet sniffer watches for emoticons and then plays an assigned sound for each one as it comes across the network. The listener can hear the overall mood of a certain location.
 

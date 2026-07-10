@@ -17,6 +17,4 @@ links:
     url: https://github.com/FoundSounds/FoundSounds-Web
 ---
 
-An international collaborative art project disguised as a social network, running
-from 2010 to 2015. FoundSounds invited people around the world to record, share,
-and recombine the sounds of their everyday environments.
+An international collaborative art project disguised as a social network, running from 2010 to 2015. FoundSounds invited people around the world to record, share, and recombine the sounds of their everyday environments.

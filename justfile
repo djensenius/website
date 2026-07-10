@@ -70,6 +70,11 @@ v86-image:
 v86-fetch:
     ./scripts/fetch-v86-image.sh
 
+# Reflow hard-wrapped Markdown content into single logical lines so the emulator
+# terminal (bat/less) soft-wraps cleanly at any width. Run after editing content.
+reflow-md:
+    node scripts/reflow-md.mjs src/content/pages/*.md src/content/projects/*.md
+
 # Regenerate the v86 WASM emulator's 9p filesystem from Markdown (issue #37).
 # Writes public/emulator/v86/fs.json and public/emulator/v86/fs/. No Docker needed.
 v86-fs:
