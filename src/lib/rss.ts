@@ -2,8 +2,7 @@ import type { RSSFeedItem } from '@astrojs/rss';
 import { sortProjects, type ProjectInput } from './manifest';
 
 export const feedTitle = 'David Jensenius';
-export const feedDescription =
-  'Projects and writing by David Jensenius, composer and media artist.';
+export const feedDescription = 'Projects by David Jensenius, composer and media artist.';
 
 export function siteWithBase(site: URL, base: string): URL {
   return new URL(base, site);
