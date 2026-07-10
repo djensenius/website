@@ -47,7 +47,7 @@ just v86-fetch  # download the prebuilt v86 emulator image from the emulator-ima
 just v86-image  # rebuild the v86 emulator image from source (Dockerized, long)
 just v86-fs     # regenerate the v86 WASM emulator filesystem from Markdown (#37)
 just v86-smoke  # boot the v86 emulator headless and verify content mounts (#37)
-just serve      # run the self-host container — WIP (#38)
+just serve      # build & run the optional self-host container (Docker, #38)
 ```
 
 ## Analytics
@@ -64,6 +64,42 @@ subpath deploys. Empty or unset `PUBLIC_PLAUSIBLE_SRC` defaults to
 For GitHub Pages deploys, these public build-time environment variables can be added to the
 build step in [`.github/workflows/deploy-preview.yml`](.github/workflows/deploy-preview.yml).
 Do not hardcode a domain in source.
+
+## Self-hosting (optional)
+
+Production is served from **GitHub Pages** (#30). As an optional backup/experiment, the
+site can also run as a container on the DeskPi rack (issue #38). It's a multi-stage build:
+Node builds the static Astro output, then [Caddy](https://caddyserver.com/) serves plain
+`dist/` files with clean URLs and compression — no Node runtime in the final image.
+
+```bash
+just serve                     # docker compose up --build → http://localhost:8080
+# or directly:
+docker compose up -d --build   # detached
+docker compose down            # stop
+```
+
+The build fetches the uncommitted emulator kernel/initrd from the public `emulator-image`
+release automatically (no auth needed), so the terminal boots in the served site.
+
+Configuration (all optional, via env or compose args):
+
+- `SITE_URL` — Astro `site` (default `https://jensenius.com`); sets canonical/sitemap URLs.
+- `BASE_PATH` — Astro `base` (default `/`). **Keep this `/` for the bundled Caddy
+  config, which serves the site at the container root.** A non-root value (e.g.
+  `/website/`) only works if you put a reverse proxy in front that strips the prefix —
+  the container itself does not, so `/website/...` requests would 404.
+- `HTTP_PORT` — host port to publish (default `8080`).
+- `V86_IMAGE_REPO` / `V86_IMAGE_TAG` — where to fetch the emulator binaries from
+  (default `djensenius/website` / `emulator-image`); point at a fork or pin an
+  immutable release tag.
+- `V86_BZIMAGE_SHA256` / `V86_INITRD_SHA256` — optional SHA-256 pins; when set, the
+  downloaded binaries are verified so the build is reproducible and tamper-evident.
+- `PUBLIC_PLAUSIBLE_DOMAIN` / `PUBLIC_PLAUSIBLE_SRC` — opt-in Plausible analytics
+  (see **Analytics** above); empty by default so nothing is emitted.
+
+These are wired through `docker-compose.yml`, so a `.env` file next to it (or exported
+shell vars) is picked up automatically by `just serve` / `docker compose up`.
 
 ## WASM emulator (v86)
 

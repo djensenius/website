@@ -1,0 +1,27 @@
+# Self-host the modernized site on the DeskPi rack (issue #38). Optional backup;
+# production stays on GitHub Pages (#30).
+#
+#   docker compose up -d --build      # build + serve on http://<host>:8080
+#   docker compose down               # stop
+services:
+  web:
+    build:
+      context: .
+      # All optional; defaults suit a root-served self-host. Set them in a .env
+      # file next to this compose file or in the environment before `up`.
+      args:
+        SITE_URL: ${SITE_URL:-https://jensenius.com}
+        BASE_PATH: ${BASE_PATH:-/}
+        # Point at a fork's emulator-image release, or pin an immutable tag.
+        V86_IMAGE_REPO: ${V86_IMAGE_REPO:-djensenius/website}
+        V86_IMAGE_TAG: ${V86_IMAGE_TAG:-emulator-image}
+        # Optional SHA-256 pins for the fetched emulator binaries.
+        V86_BZIMAGE_SHA256: ${V86_BZIMAGE_SHA256:-}
+        V86_INITRD_SHA256: ${V86_INITRD_SHA256:-}
+        # Opt-in Plausible analytics (see README > Analytics).
+        PUBLIC_PLAUSIBLE_DOMAIN: ${PUBLIC_PLAUSIBLE_DOMAIN:-}
+        PUBLIC_PLAUSIBLE_SRC: ${PUBLIC_PLAUSIBLE_SRC:-}
+    image: djensenius-website
+    restart: unless-stopped
+    ports:
+      - '${HTTP_PORT:-8080}:80'

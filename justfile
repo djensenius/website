@@ -84,6 +84,8 @@ v86-fs:
 v86-smoke:
     node scripts/v86-smoke.mjs
 
-# Serve the built site from the self-host container (see issue #38).
+# Build and run the optional self-host container (issue #38): builds the static
+# Astro site and serves dist/ with Caddy at http://localhost:8080. Production
+# stays on GitHub Pages; this is a rack backup/experiment. Requires Docker.
 serve:
-    @echo "TODO(#38): run the self-host container (Astro build -> nginx/caddy)."
+    docker compose up --build
