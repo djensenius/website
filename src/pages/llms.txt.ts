@@ -4,9 +4,12 @@ import { absoluteSiteUrl } from '../lib/seo';
 // Dynamic llms.txt (the emerging AI-agent convention): a clean Markdown summary
 // with absolute links that follow SITE_URL/BASE_PATH across production/preview.
 export const GET: APIRoute = ({ site }) => {
+  if (!site) {
+    return new Response('llms.txt requires the Astro site config to be set.', { status: 500 });
+  }
+
   const base = import.meta.env.BASE_URL || '/';
-  const origin = site?.href ?? 'https://david.jensenius.com/';
-  const url = (path: string) => absoluteSiteUrl(path, origin, base);
+  const url = (path: string) => absoluteSiteUrl(path, site.href, base);
 
   const body = `# David Jensenius
 

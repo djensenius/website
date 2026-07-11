@@ -4,9 +4,12 @@ import { absoluteSiteUrl } from '../lib/seo';
 // Dynamic robots.txt so the sitemap URL follows SITE_URL/BASE_PATH (production
 // custom domain at '/', or the GitHub Pages preview under a project subpath).
 export const GET: APIRoute = ({ site }) => {
+  if (!site) {
+    return new Response('robots.txt requires the Astro site config to be set.', { status: 500 });
+  }
+
   const base = import.meta.env.BASE_URL || '/';
-  const origin = site?.href ?? 'https://david.jensenius.com/';
-  const sitemap = absoluteSiteUrl('/sitemap-index.xml', origin, base);
+  const sitemap = absoluteSiteUrl('/sitemap-index.xml', site.href, base);
 
   // All crawlers, including AI agents, are welcome to index the whole site.
   const aiBots = [
