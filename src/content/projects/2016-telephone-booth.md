@@ -6,6 +6,9 @@ tags:
   - installation
   - interactive
   - telephony
+links:
+  - label: Source (original)
+    url: https://github.com/djensenius/Telephone-Booth/tree/legacy-node-v1
 ---
 
 A phone booth with an older-style rotary pay phone is placed in a surprising location. The instructions plate reads:
