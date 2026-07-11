@@ -49,11 +49,6 @@ fmt:
 test:
     npm test
 
-# Build the bootable disk image from Markdown (Dockerized — see issue #33).
-# Regenerates public/emulator/root.bin from src/content. Requires Docker.
-image:
-    ./scripts/build-image.sh
-
 # Rebuild the v86 in-browser Linux image (Buildroot glibc + busybox/vim/bat,
 # djensenius-themed login). Writes public/emulator/v86/buildroot-bzimage.bin
 # and buildroot-initrd.bin.

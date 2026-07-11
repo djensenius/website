@@ -42,7 +42,6 @@ just dev        # start the dev server
 just build      # build the production static site
 just preview    # preview the production build
 just check      # format + lint + type-check (Vite+ and astro check)
-just image      # build the legacy emulator disk image from Markdown (Dockerized, #33)
 just v86-fetch  # download the prebuilt v86 emulator image from the emulator-image release
 just v86-image  # rebuild the v86 emulator image from source (Dockerized, long)
 just v86-fs     # regenerate the v86 WASM emulator filesystem from Markdown (#37)
@@ -131,24 +130,11 @@ These binaries are third-party (v86, SeaBIOS, VGABIOS, and a buildroot Linux ker
 licenses and source pointers are documented in
 [`public/emulator/v86/THIRD_PARTY_NOTICES.md`](public/emulator/v86/THIRD_PARTY_NOTICES.md).
 
-## Emulator disk image (legacy format)
-
-`just image` regenerates the emulator's bootable disk image from the Markdown content,
-replacing the old manual `sudo mount -o loop` editing. The build:
-
-1. `scripts/gen-emulator-content.mjs` strips frontmatter from `src/content/**` and writes a
-   plain-text tree (`info/bio.txt`, `projects/<id>.txt`, …).
-2. `scripts/build-image.sh` copies the pristine base rootfs (`root.bin`) and, inside a
-   Docker container with `e2tools`, swaps in the freshly generated `/root` content — no
-   privileged loop mount required — writing `public/emulator/root.bin`.
-
-Markdown stays the single source of truth for both the file-navigation view and the
-emulator. Re-run `just image` and commit `public/emulator/root.bin` after editing content.
-
 ## Legacy
 
 The original site ran a jslinux emulator booting `root.bin` (an ext2 image edited via
-`sudo mount -o loop`). During migration, the legacy `root/` content and `root.bin` remain
-in the repo and are being ported to Markdown under `src/content/`. The emulator has been
-modernized to a WASM-based build (v86, see above and #37); the `jslinux-mobile` submodule is
-kept as reference until the final cleanup.
+`sudo mount -o loop`), with content authored as plain text under `root/` and an early
+transitional disk-image pipeline (`scripts/build-image.sh` → `public/emulator/root.bin`).
+All of that has been superseded by the Markdown-driven v86 build described above and
+removed from the tree. The full pre-modernization site is archived under the
+[`legacy-jslinux`](https://github.com/djensenius/website/tree/legacy-jslinux) git tag.

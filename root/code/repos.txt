@@ -1,9 +1,0 @@
-https://github.com/FoundSounds/FoundSounds-API
-https://github.com/FoundSounds/FoundSounds-iOS
-https://github.com/FoundSounds/FoundSounds-Web
-https://github.com/djensenius/Telephone-Booth
-https://github.com/djensenius/website
-https://github.com/djensenius/generator
-https://github.com/djensenius/gopod
-
-More coming...
