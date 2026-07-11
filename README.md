@@ -137,4 +137,4 @@ The original site ran a jslinux emulator booting `root.bin` (an ext2 image edite
 transitional disk-image pipeline (`scripts/build-image.sh` → `public/emulator/root.bin`).
 All of that has been superseded by the Markdown-driven v86 build described above and
 removed from the tree. The full pre-modernization site is archived under the
-[`legacy-jslinux`](https://github.com/djensenius/website/releases/tag/legacy-jslinux) git tag.
+[`legacy-jslinux`](https://github.com/djensenius/website/tree/legacy-jslinux) git tag.
