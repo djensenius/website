@@ -25,10 +25,10 @@ export const GET: APIRoute = ({ site }) => {
 
   const body = [
     'User-agent: *',
-    'Allow: /',
+    'Disallow:',
     '',
     '# AI crawlers — explicitly allowed so the site can surface in AI answers.',
-    ...aiBots.flatMap((bot) => [`User-agent: ${bot}`, 'Allow: /', '']),
+    ...aiBots.flatMap((bot) => [`User-agent: ${bot}`, 'Disallow:', '']),
     `Sitemap: ${sitemap}`,
     '',
   ].join('\n');
