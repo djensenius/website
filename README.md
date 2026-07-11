@@ -84,7 +84,7 @@ release automatically (no auth needed), so the terminal boots in the served site
 
 Configuration (all optional, via env or compose args):
 
-- `SITE_URL` — Astro `site` (default `https://jensenius.com`); sets canonical/sitemap URLs.
+- `SITE_URL` — Astro `site` (default `https://david.jensenius.com`); sets canonical/sitemap URLs.
 - `BASE_PATH` — Astro `base` (default `/`). **Keep this `/` for the bundled Caddy
   config, which serves the site at the container root.** A non-root value (e.g.
   `/website/`) only works if you put a reverse proxy in front that strips the prefix —
