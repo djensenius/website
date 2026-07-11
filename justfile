@@ -75,6 +75,11 @@ v86-fetch:
 reflow-md:
     node scripts/reflow-md.mjs src/content/pages/*.md src/content/projects/*.md
 
+# Regenerate the social-share (Open Graph) image from scripts/og-image.svg into
+# public/og.png. Requires rsvg-convert (librsvg).
+og-image:
+    rsvg-convert -w 1200 -h 630 scripts/og-image.svg -o public/og.png
+
 # Regenerate the v86 WASM emulator's 9p filesystem from Markdown (issue #37).
 # Writes public/emulator/v86/fs.json and public/emulator/v86/fs/. No Docker needed.
 v86-fs:
