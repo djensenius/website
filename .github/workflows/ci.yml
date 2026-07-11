@@ -79,6 +79,25 @@ jobs:
       - name: Build
         run: just build
 
+  emulator-fs:
+    name: Emulator filesystem
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up tools (mise → Node, just)
+        uses: jdx/mise-action@v4
+      - name: Install dependencies
+        run: just install
+      - name: Regenerate v86 filesystem from Markdown
+        run: just v86-fs
+      - name: Verify committed filesystem is up to date
+        run: |
+          if ! git diff --exit-code -- public/emulator/v86; then
+            echo "::error::The v86 emulator filesystem is out of date. Run 'just v86-fs' and commit the result."
+            exit 1
+          fi
+
   lighthouse:
     name: Lighthouse
     runs-on: ubuntu-latest
