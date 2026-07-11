@@ -15,16 +15,16 @@ export const GET: APIRoute = ({ site }) => {
 The site is a portfolio presented two ways from a single Markdown source: an in-browser Linux terminal emulator and a plain, accessible file-navigation view. Every page below is a crawlable static URL.
 
 ## About
-- [Bio](${url('/files/info/bio/')}): Artist biography.
-- [CV — Art](${url('/files/info/cv-art/')}): Exhibitions, performances, and art practice.
-- [CV — Tech](${url('/files/info/cv-tech/')}): Technical and software work.
-- [Contact](${url('/files/info/contact/')}): How to get in touch.
+- [Bio](${url('/files/info/bio')}): Artist biography.
+- [CV — Art](${url('/files/info/cv-art')}): Exhibitions, performances, and art practice.
+- [CV — Tech](${url('/files/info/cv-tech')}): Technical and software work.
+- [Contact](${url('/files/info/contact')}): How to get in touch.
 
 ## Selected works
-- [Telephone Booth (2026)](${url('/files/projects/2026-telephone-booth/')}): Rotary pay-phone installation for emergent, decontextualized dialogue.
-- [Untitled (2020)](${url('/files/projects/2020-untitled/')}): Graphical score.
-- [FoundSounds (2015)](${url('/files/projects/2015-foundsounds/')}): International collaborative art project disguised as a social network.
-- [Telephone Booth (2016)](${url('/files/projects/2016-telephone-booth/')}): The original rotary pay-phone installation, CAFKA 2016.
+- [Telephone Booth (2026)](${url('/files/projects/2026-telephone-booth')}): Rotary pay-phone installation for emergent, decontextualized dialogue.
+- [Untitled (2020)](${url('/files/projects/2020-untitled')}): Graphical score.
+- [FoundSounds (2015)](${url('/files/projects/2015-foundsounds')}): International collaborative art project disguised as a social network.
+- [Telephone Booth (2016)](${url('/files/projects/2016-telephone-booth')}): The original rotary pay-phone installation, CAFKA 2016.
 
 ## More
 - [All works and files](${url('/files/')}): Full, browsable list of projects and pages.
