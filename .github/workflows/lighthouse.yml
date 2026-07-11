@@ -33,4 +33,4 @@ jobs:
         run: just build
 
       - name: Audit static site
-        run: npx lhci autorun --config=./lighthouserc.json
+        run: npx @lhci/cli autorun --config=./lighthouserc.json

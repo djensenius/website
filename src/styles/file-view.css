@@ -109,6 +109,12 @@ a.entry {
   all: unset;
   cursor: pointer;
   color: var(--file);
+  /* Larger, full-row tap target for touch/pointer accessibility (WCAG 2.5.8). */
+  display: block;
+  padding: 0.35rem 0.5rem;
+  min-height: 1.4rem;
+  line-height: 1.4;
+  border-radius: 4px;
 }
 
 a.entry:hover {
@@ -174,6 +180,29 @@ main a:focus-visible {
 
 [hidden] {
   display: none !important;
+}
+
+/* Narrow screens: the 18rem sidebar leaves no room for content, so stack the
+   file tree above the viewer in a single column. */
+@media (max-width: 40rem) {
+  body {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto 1fr;
+  }
+
+  nav {
+    grid-column: 1;
+    grid-row: 2;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: 45vh;
+  }
+
+  main {
+    grid-column: 1;
+    grid-row: 3;
+    padding: 1.25rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

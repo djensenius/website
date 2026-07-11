@@ -22,3 +22,6 @@ npm-debug.log*
 
 # os / editor
 .DS_Store
+
+# Lighthouse CI local reports
+.lighthouseci/
