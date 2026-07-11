@@ -25,10 +25,45 @@ const base = import.meta.env.BASE_URL || '/';
 const canonicalUrl = absoluteSiteUrl(canonical ?? path ?? Astro.url.pathname, site, base);
 const imageUrl = absoluteSiteUrl(image, site, base);
 const faviconUrl = `${base}favicon.svg`.replace(/\/{2,}/g, '/');
+const homeUrl = absoluteSiteUrl('/', site, base);
+
+// Sitewide identity as schema.org structured data. This is the primary signal
+// that lets search engines (Knowledge Graph) and AI agents resolve who David
+// Jensenius is — a Canadian composer and media artist — independent of the
+// (deliberately clean) visible page copy. The nationality/jobTitle live here
+// rather than in the on-page text.
+const personDescription =
+  'David Jensenius is a Canadian composer and media artist working with sound, performance, installation, electronics, and custom software.';
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Person',
+      '@id': `${homeUrl}#person`,
+      name: siteName,
+      jobTitle: ['Composer', 'Media artist'],
+      nationality: { '@type': 'Country', name: 'Canada' },
+      description: personDescription,
+      url: homeUrl,
+      image: imageUrl,
+      sameAs: ['https://github.com/djensenius'],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${homeUrl}#website`,
+      url: homeUrl,
+      name: siteName,
+      description: personDescription,
+      inLanguage: 'en',
+      publisher: { '@id': `${homeUrl}#person` },
+    },
+  ],
+};
 ---
 
 <title>{title}</title>
 <meta name="description" content={description} />
+<meta name="author" content={siteName} />
 <link rel="icon" href={faviconUrl} type="image/svg+xml" />
 <link rel="canonical" href={canonicalUrl} />
 <meta property="og:title" content={title} />
@@ -41,3 +76,4 @@ const faviconUrl = `${base}favicon.svg`.replace(/\/{2,}/g, '/');
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={imageUrl} />
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)} />

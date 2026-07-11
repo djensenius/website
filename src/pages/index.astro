@@ -8,7 +8,12 @@ import Emulator from '../components/Emulator.astro';
 import Analytics from '../components/Analytics.astro';
 import ModeToggle from '../components/ModeToggle.astro';
 const title = 'David Jensenius';
-const description = 'The work and portfolio of David Jensenius, composer and media artist.';
+// Metadata-only title/description carry the "Canadian composer & media artist"
+// descriptors for search + AI discovery; the visible <h1> below stays just the
+// name so the on-page copy remains clean.
+const metaTitle = 'David Jensenius — Canadian composer & media artist';
+const description =
+  'David Jensenius is a Canadian composer and media artist working with sound, performance, installation, and custom software.';
 const rssHref = `${import.meta.env.BASE_URL}rss.xml`.replace(/\/{2,}/g, '/');
 const filesHref = `${import.meta.env.BASE_URL}/files/`.replace(/\/{2,}/g, '/');
 ---
@@ -18,7 +23,7 @@ const filesHref = `${import.meta.env.BASE_URL}/files/`.replace(/\/{2,}/g, '/');
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <BaseHead title={title} description={description} path="/" />
+    <BaseHead title={metaTitle} description={description} path="/" />
     <link rel="alternate" type="application/rss+xml" title="David Jensenius RSS" href={rssHref} />
     <Analytics />
   </head>

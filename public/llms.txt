@@ -1,0 +1,21 @@
+# David Jensenius
+
+> David Jensenius is a Canadian composer and media artist working with sound, performance, installation, and custom software. His work turns obsolete technologies and everyday encounters into sites of chance, intimacy, and emergent dialogue, exhibited and performed across Canada and internationally.
+
+The site is a portfolio presented two ways from a single Markdown source: an in-browser Linux terminal emulator and a plain, accessible file-navigation view. Every page below is a crawlable static URL.
+
+## About
+- [Bio](https://david.jensenius.com/files/info/bio/): Artist biography.
+- [CV — Art](https://david.jensenius.com/files/info/cv-art/): Exhibitions, performances, and art practice.
+- [CV — Tech](https://david.jensenius.com/files/info/cv-tech/): Technical and software work.
+- [Contact](https://david.jensenius.com/files/info/contact/): How to get in touch.
+
+## Selected works
+- [Telephone Booth (2026)](https://david.jensenius.com/files/projects/2026-telephone-booth/): Rotary pay-phone installation for emergent, decontextualized dialogue.
+- [Untitled (2020)](https://david.jensenius.com/files/projects/2020-untitled/): Graphical score.
+- [FoundSounds (2015)](https://david.jensenius.com/files/projects/2015-foundsounds/): International collaborative art project disguised as a social network.
+- [Telephone Booth (2016)](https://david.jensenius.com/files/projects/2016-telephone-booth/): The original rotary pay-phone installation, CAFKA 2016.
+
+## More
+- [All works and files](https://david.jensenius.com/files/): Full, browsable list of projects and pages.
+- [GitHub](https://github.com/djensenius): Source code for many of the works.
