@@ -1,6 +1,6 @@
 // Generate the v86 emulator's 9p filesystem from the Markdown content
 // collections (issue #37). Markdown stays the single source of truth: this
-// reuses buildContentTree() (the same rendering path as the legacy disk image)
+// reuses buildContentTree() (the shared Markdown rendering path)
 // and emits v86's JSON/HTTP 9p filesystem format:
 //
 //   public/emulator/v86/fs.json        — filesystem index (fs2json.py "version 3")
@@ -81,7 +81,7 @@ function main() {
   const outDir = process.argv[2] ?? join(repoRoot, 'public', 'emulator', 'v86');
   const fsDir = join(outDir, 'fs');
 
-  const { fsjson, store } = buildFs(buildContentTree({ includeLegacyLicense: false }));
+  const { fsjson, store } = buildFs(buildContentTree());
 
   // Fresh body store; leave sibling assets (wasm, bios, bzimage) untouched.
   if (existsSync(fsDir)) rmSync(fsDir, { recursive: true, force: true });

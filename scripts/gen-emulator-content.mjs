@@ -1,14 +1,13 @@
-// Generate the emulator's Markdown content tree from the Markdown content
-// collections (issue #33). Markdown stays the single source of truth: this
-// strips frontmatter and writes `.md` files mirroring the virtual filesystem,
-// which scripts/build-image.sh injects into the bootable disk image. Shipping
-// Markdown (rather than plain text) lets the guest's `bat` syntax-highlight it.
+// Render the emulator's content tree from the Markdown content collections.
+// Markdown stays the single source of truth: this strips frontmatter and
+// produces `.md` entries mirroring the virtual filesystem, consumed by the v86
+// 9p filesystem generator (gen-v86-fs.mjs). Shipping Markdown (rather than plain
+// text) lets the guest's `bat` syntax-highlight it.
 //
-// Output layout (under the staging dir passed as argv[2], default build/emulator-root):
+// Layout produced by buildContentTree():
 //   info/bio.md  info/cv-art.md  info/cv-tech.md  info/contact.md  (from src/content/pages)
-//   projects/<id>.md                   (from src/content/projects)
-//   LICENSE                             (copied from root/LICENSE)
-import { readFileSync, readdirSync, writeFileSync, mkdirSync, rmSync, existsSync } from 'node:fs';
+//   projects/<id>.md                                               (from src/content/projects)
+import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -69,13 +68,7 @@ function readCollection(name) {
     });
 }
 
-function writeFile(outDir, relPath, contents) {
-  const full = join(outDir, relPath);
-  mkdirSync(dirname(full), { recursive: true });
-  writeFileSync(full, contents.endsWith('\n') ? contents : `${contents}\n`);
-}
-
-/** Render a page entry to the Markdown body written into the image. */
+/** Render a page entry to the Markdown body served in the emulator. */
 export function renderPage(page) {
   const title = page.fm.title ?? page.id;
   return `# ${title}\n\n${page.body}\n`;
@@ -93,16 +86,11 @@ export function renderProject(project) {
 
 /**
  * Build the emulator's virtual filesystem in memory: an array of
- * `{ path, contents }` entries mirroring the on-disk layout. Both the plain-text
- * generator (`main`) and the v86 9p filesystem generator (`gen-v86-fs.mjs`)
- * consume this, keeping a single rendering path from Markdown.
- *
- * `includeLegacyLicense` appends `root/LICENSE` — the JSLinux-derivative notice
- * (with a redistribution prohibition). It belongs in the legacy jslinux disk
- * image only; the modern v86 build documents its licensing separately in
- * public/emulator/v86/THIRD_PARTY_NOTICES.md, so it opts out.
+ * `{ path, contents }` entries mirroring the on-disk layout. The v86 9p
+ * filesystem generator (`gen-v86-fs.mjs`) consumes this, keeping a single
+ * rendering path from Markdown.
  */
-export function buildContentTree({ includeLegacyLicense = true } = {}) {
+export function buildContentTree() {
   const files = [];
   const push = (path, contents) => {
     files.push({ path, contents: contents.endsWith('\n') ? contents : `${contents}\n` });
@@ -111,26 +99,5 @@ export function buildContentTree({ includeLegacyLicense = true } = {}) {
   for (const project of readCollection('projects')) {
     push(`projects/${project.id}.md`, renderProject(project));
   }
-  const license = join(repoRoot, 'root', 'LICENSE');
-  if (includeLegacyLicense && existsSync(license)) push('LICENSE', readFileSync(license, 'utf8'));
   return files;
-}
-
-function main() {
-  const outDir = process.argv[2] ?? join(repoRoot, 'build', 'emulator-root');
-
-  // Fresh, deterministic output.
-  if (existsSync(outDir)) rmSync(outDir, { recursive: true, force: true });
-  mkdirSync(outDir, { recursive: true });
-
-  const files = buildContentTree();
-  for (const { path, contents } of files) writeFile(outDir, path, contents);
-
-  const count = files.filter((f) => f.path.endsWith('.md')).length;
-  console.log(`Generated ${count} Markdown files into ${outDir}`);
-}
-
-// Only run the build when invoked directly (not when imported by tests).
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  main();
 }
