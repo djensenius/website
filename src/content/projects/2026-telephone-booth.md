@@ -10,6 +10,14 @@ tags:
 links:
   - label: Source (Rust rewrite)
     url: https://github.com/djensenius/Telephone-Booth
+  - label: Operator console source
+    url: https://github.com/djensenius/Telephone-Booth-Operator
+  - label: Operator mobile app source
+    url: https://github.com/djensenius/Telephone-Booth-Operator-Mobile
+  - label: Operator CLI source
+    url: https://github.com/djensenius/Telephone-Booth-Operator-cli
+  - label: Transcription gateway source
+    url: https://github.com/djensenius/Telephone-Booth-Transcription
 media: []
 status: complete
 ---
