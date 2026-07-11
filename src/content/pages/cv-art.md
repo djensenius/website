@@ -7,19 +7,6 @@ description: David Jensenius — art curriculum vitae.
 David Jensenius\
 [david@jensenius.com](mailto:david@jensenius.com)
 
-## Board Work
-
-### 2018–Present — Board of Directors, President, NUMUS. Waterloo ON
-
-- Chair board meetings and set agendas.
-- Review financials; participate in fundraising campaigns and give feedback on marketing and venue selection.
-
-### 2014–2018 — Board of Directors, Secretary, WCSS 556 (Arrow Lofts). Kitchener ON
-
-- Made decisions in the best interest of the condo corporation and owners.
-- Selected and worked with the property manager to keep the building operating smoothly.
-- Reviewed financials and offered suggestions to improve the building.
-
 ## Performances / Exhibitions
 
 - **2020** — _Untitled_. NUMUS 2020 season, premiered by [Kathryn Ladano](https://www.kathrynladano.com). Waterloo ON.
@@ -93,6 +80,19 @@ David Jensenius\
 ### 2008 — Guest Curator, Monkeytown. Brooklyn NY
 
 - Guest-curated a program at Monkeytown.
+
+## Board Work
+
+### 2018–Present — Board of Directors, President, NUMUS. Waterloo ON
+
+- Chair board meetings and set agendas.
+- Review financials; participate in fundraising campaigns and give feedback on marketing and venue selection.
+
+### 2014–2018 — Board of Directors, Secretary, WCSS 556 (Arrow Lofts). Kitchener ON
+
+- Made decisions in the best interest of the condo corporation and owners.
+- Selected and worked with the property manager to keep the building operating smoothly.
+- Reviewed financials and offered suggestions to improve the building.
 
 ## Education
 
