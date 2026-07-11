@@ -10,7 +10,7 @@ const base = `/${rawBase.replace(/^\/+|\/+$/g, '')}/`.replace(/\/{2,}/g, '/');
 
 // https://astro.build/config
 export default defineConfig({
-  site: process.env.SITE_URL || 'https://jensenius.com',
+  site: process.env.SITE_URL || 'https://david.jensenius.com',
   // BASE_PATH lets the GitHub Pages preview deploy (issue #40) serve from the
   // project subpath (e.g. /website) while production at the custom domain uses '/'.
   base,

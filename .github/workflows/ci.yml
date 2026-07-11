@@ -91,7 +91,7 @@ jobs:
         run: just install
       - name: Build
         env:
-          SITE_URL: https://jensenius.com
+          SITE_URL: https://david.jensenius.com
           BASE_PATH: /
         run: just build
       - name: Audit static site

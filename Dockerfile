@@ -17,7 +17,7 @@ FROM node:26-slim AS build
 
 # SITE_URL/BASE_PATH feed Astro's `site`/`base`. Defaults suit a root-served
 # self-host; the GitHub Pages deploy passes its own values.
-ARG SITE_URL=https://jensenius.com
+ARG SITE_URL=https://david.jensenius.com
 ARG BASE_PATH=/
 ARG V86_IMAGE_REPO=djensenius/website
 ARG V86_IMAGE_TAG=emulator-image

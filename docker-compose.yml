@@ -10,7 +10,7 @@ services:
       # All optional; defaults suit a root-served self-host. Set them in a .env
       # file next to this compose file or in the environment before `up`.
       args:
-        SITE_URL: ${SITE_URL:-https://jensenius.com}
+        SITE_URL: ${SITE_URL:-https://david.jensenius.com}
         BASE_PATH: ${BASE_PATH:-/}
         # Point at a fork's emulator-image release, or pin an immutable tag.
         V86_IMAGE_REPO: ${V86_IMAGE_REPO:-djensenius/website}
