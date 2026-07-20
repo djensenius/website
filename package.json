@@ -25,9 +25,9 @@
     "@astrojs/check": "^0.9.9",
     "@lhci/cli": "^0.15.1",
     "@types/node": "^26.1.1",
-    "@voidzero-dev/vite-plus-core": "^0.2.4",
-    "typescript": "^6.0.3",
-    "vite-plus": "^0.2.4"
+    "@voidzero-dev/vite-plus-core": "^0.2.5",
+    "typescript": "^7.0.2",
+    "vite-plus": "^0.2.5"
   },
   "overrides": {
     "vite": "npm:@voidzero-dev/vite-plus-core@0.2.4",
