@@ -54,7 +54,7 @@ jobs:
           df -h /
 
       - name: Set up tools (mise → Node, just)
-        uses: jdx/mise-action@v4
+        uses: jdx/mise-action@v4.2.3
 
       # Cache Buildroot's download folder so re-builds don't refetch the whole
       # toolchain/kernel/package tarballs. Keyed on the config so a config change
