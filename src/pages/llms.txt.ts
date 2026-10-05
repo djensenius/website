@@ -24,7 +24,7 @@ The site is a portfolio presented two ways from a single Markdown source: an in-
 - [Contact](${url('/files/info/contact')}): How to get in touch.
 
 ## Selected works
-- [Telephone Booth (2026)](${url('/files/projects/2026-telephone-booth')}): Rotary pay-phone installation for emergent, decontextualized dialogue.
+- [Telephone Booth (Where Walls Meet Sky, 2026)](${url('/files/projects/2026-telephone-booth')}): Rotary pay-phone installation for emergent, decontextualized dialogue.
 - [Untitled (2020)](${url('/files/projects/2020-untitled')}): Graphical score.
 - [FoundSounds (2015)](${url('/files/projects/2015-foundsounds')}): International collaborative art project disguised as a social network.
 - [Telephone Booth (2016)](${url('/files/projects/2016-telephone-booth')}): The original rotary pay-phone installation, CAFKA 2016.

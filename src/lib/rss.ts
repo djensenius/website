@@ -9,6 +9,13 @@ export function siteWithBase(site: URL, base: string): URL {
 }
 
 export function projectPubDate(project: ProjectInput): Date | undefined {
+  if (project.data.date) {
+    const date =
+      project.data.date instanceof Date
+        ? new Date(project.data.date.getTime())
+        : new Date(project.data.date);
+    if (!Number.isNaN(date.getTime())) return date;
+  }
   return project.data.year ? new Date(Date.UTC(project.data.year, 0, 1)) : undefined;
 }
 

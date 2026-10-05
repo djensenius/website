@@ -36,6 +36,7 @@ export type ProjectInput = {
   data: {
     title: string;
     year?: number;
+    date?: Date | string;
     summary?: string;
     media?: FsNode['media'];
   };
@@ -44,14 +45,27 @@ export function sortPages<T extends PageInput>(pages: T[]): T[] {
   return [...pages].sort((a, b) => a.data.order - b.data.order);
 }
 
+function dateValue(date: Date | string | undefined): number {
+  if (!date) return Number.NaN;
+  return date instanceof Date ? date.getTime() : new Date(date).getTime();
+}
+
 // Projects are listed newest-first: entries with no year (ongoing work) sort to
-// the very top, then descending by year, then descending by id as a stable
-// tiebreak so the whole list reads most-recent → oldest.
+// the very top, then descending by year. Within a year, dated entries sort by
+// date descending before falling back to descending id as a stable tiebreak.
 export function sortProjects<T extends ProjectInput>(projects: T[]): T[] {
   return [...projects].sort((a, b) => {
     const ay = a.data.year ?? Number.POSITIVE_INFINITY;
     const by = b.data.year ?? Number.POSITIVE_INFINITY;
     if (ay !== by) return by - ay;
+
+    const at = dateValue(a.data.date);
+    const bt = dateValue(b.data.date);
+    const aDated = !Number.isNaN(at);
+    const bDated = !Number.isNaN(bt);
+    if (aDated && bDated && at !== bt) return bt - at;
+    if (aDated !== bDated) return aDated ? -1 : 1;
+
     return b.id.localeCompare(a.id);
   });
 }
