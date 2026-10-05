@@ -1,27 +1,12 @@
----
-title: Telephone Booth (Where Walls Meet Sky)
-year: 2026
-date: 2026-08-22
-summary: A site-specific rotary pay phone installation for the Where Walls Meet Sky exhibition at St. Anne's Anglican Church in Toronto, gathering and recombining voices around loss, rebuilding, and chance communion.
-tags:
-  - installation
-  - interactive
-  - telephony
-  - sound
-links:
-  - label: Source (Rust rewrite)
-    url: https://github.com/djensenius/Telephone-Booth
-  - label: Operator console source
-    url: https://github.com/djensenius/Telephone-Booth-Operator
-  - label: Operator mobile app source
-    url: https://github.com/djensenius/Telephone-Booth-Operator-Mobile
-  - label: Operator CLI source
-    url: https://github.com/djensenius/Telephone-Booth-Operator-cli
-  - label: Transcription gateway source
-    url: https://github.com/djensenius/Telephone-Booth-Transcription
-media: []
-status: complete
----
+# Telephone Booth (Where Walls Meet Sky) (2026)
+
+A site-specific rotary pay phone installation for the Where Walls Meet Sky exhibition at St. Anne's Anglican Church in Toronto, gathering and recombining voices around loss, rebuilding, and chance communion.
+
+- [Source (Rust rewrite)](https://github.com/djensenius/Telephone-Booth)
+- [Operator console source](https://github.com/djensenius/Telephone-Booth-Operator)
+- [Operator mobile app source](https://github.com/djensenius/Telephone-Booth-Operator-Mobile)
+- [Operator CLI source](https://github.com/djensenius/Telephone-Booth-Operator-cli)
+- [Transcription gateway source](https://github.com/djensenius/Telephone-Booth-Transcription)
 
 Presented as part of _Where Walls Meet Sky_, a rotary pay phone and booth waited inside St. Anne's Anglican Church, Toronto: an obsolete public technology placed in a sanctuary transformed by fire. The plate promised free calls. Dial 1 answered a question and left a message; dial 2 played a stranger's answer returned without its original prompt.
 
