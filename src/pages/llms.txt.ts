@@ -19,6 +19,7 @@ The site is a portfolio presented two ways from a single Markdown source: an in-
 
 ## About
 - [Bio](${url('/files/info/bio')}): Artist biography.
+- [Press](${url('/files/info/press')}): Selected press, interviews, and exhibition coverage.
 - [CV — Art](${url('/files/info/cv-art')}): Exhibitions, performances, and art practice.
 - [CV — Tech](${url('/files/info/cv-tech')}): Technical and software work.
 - [Contact](${url('/files/info/contact')}): How to get in touch.

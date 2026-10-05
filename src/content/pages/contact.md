@@ -1,6 +1,6 @@
 ---
 title: contact
-order: 4
+order: 5
 description: How to reach David Jensenius.
 ---
 

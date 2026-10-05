@@ -5,7 +5,7 @@
 // text) lets the guest's `bat` syntax-highlight it.
 //
 // Layout produced by buildContentTree():
-//   info/bio.md  info/cv-art.md  info/cv-tech.md  info/contact.md  (from src/content/pages)
+//   info/bio.md  info/contact.md  info/cv-art.md  info/cv-tech.md  info/press.md  (from src/content/pages)
 //   projects/<id>.md                                               (from src/content/projects)
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';

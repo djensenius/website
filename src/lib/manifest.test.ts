@@ -8,8 +8,9 @@ import {
 } from './manifest';
 
 const pages: PageInput[] = [
-  { id: 'contact', data: { title: 'contact', order: 4 } },
+  { id: 'contact', data: { title: 'contact', order: 5 } },
   { id: 'bio', data: { title: 'bio', order: 1 } },
+  { id: 'press', data: { title: 'press', order: 4 } },
   { id: 'cv-art', data: { title: 'cv-art', order: 2 } },
   { id: 'cv-tech', data: { title: 'cv-tech', order: 3 } },
 ];
@@ -40,7 +41,13 @@ const now = new Date('2024-01-01T00:00:00.000Z');
 test('pages are ordered by their order field', () => {
   const { nodes } = assembleManifest(pages, projects, now);
   const pagePaths = nodes.filter((n) => n.collection === 'pages').map((n) => n.path);
-  expect(pagePaths).toEqual(['/info/bio', '/info/cv-art', '/info/cv-tech', '/info/contact']);
+  expect(pagePaths).toEqual([
+    '/info/bio',
+    '/info/cv-art',
+    '/info/cv-tech',
+    '/info/press',
+    '/info/contact',
+  ]);
 });
 
 test('projects sort newest-first: no-year first, then year desc, then id desc', () => {
